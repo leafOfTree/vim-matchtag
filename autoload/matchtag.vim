@@ -1,0 +1,171 @@
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"
+" Config {{{
+"
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+function! s:GetConfig(name, default)
+  let name = 'g:vim_matchtag_'.a:name
+  return exists(name) ? eval(name) : a:default
+endfunction
+
+let s:name = 'vim-matchtag'
+let s:match_id = 99
+let s:debug = s:GetConfig('debug', 0)
+let s:timeout = s:GetConfig('timeout', 300)
+"}}}
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"
+" Functions {{{
+"
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" The function that is invoked (very often) to definie a ":match"
+" highlighting for any matching tag.
+function! matchtag#HighlightMatchingTag()
+  " Remove any previous match.
+  if exists('w:match_tag_hl_on') && w:match_tag_hl_on
+    silent! call s:DeleteMatch()
+    let w:match_tag_hl_on = 0
+  endif
+
+  " Avoid removing the popup menu.
+  " Or return when there are no colors
+  if pumvisible() || (&t_Co < 8 && !has('gui_running'))
+    return 
+  endif
+
+  call s:HighlightTag()
+endfunction
+
+function! s:HighlightTag()
+  let save_cursor = getcurpos()
+
+  let [row, col] = s:GetTagPos()
+  if row
+    " Current tag
+    let tagname = s:GetTagName(row, col)
+    let pos = [[row, col+1, len(tagname)]]
+    call matchaddpos('MatchTag', pos, 10, s:match_id)
+
+    " Set cursor to tag start to search backward correctly
+    call cursor(row, col)
+
+    " Matching tag
+    let [match_row, match_col, offset] = s:SearchMatchTag(tagname)
+    let match_tagname = s:GetTagName(match_row, match_col)
+    let match_pos = [[match_row, match_col+offset, len(match_tagname)+1]]
+    call matchaddpos('MatchTag', match_pos, 10, s:match_id+1)
+
+    let w:match_tag_hl_on = 1
+    call matchtag#Log('In tag '.tagname)
+    call matchtag#Log('Match tag '.match_tagname)
+  else
+    call matchtag#Log('Not in tag pair')
+  endif
+
+  call setpos('.', save_cursor)
+endfunction
+
+function! s:GetTagPos()
+  let timeout = s:timeout
+  let has_open = 0
+  let has_close = 0
+  let [left_row, left_col] = searchpos('<', 'bcnW', line('w0'), timeout)
+  let [right_row, right_col] = searchpos('>', 'bnW', line('w0'), timeout)
+  if (left_row == right_row && left_col > right_col) 
+        \ || (left_row > right_row)
+    let has_open = 1
+  endif
+
+  let [left_row2, left_col2] = searchpos('<', 'nW', line('w$'), timeout)
+  let [right_row2, right_col2] = searchpos('\(/\)\@<!>', 'cnW', line('w$'), timeout)
+  if (right_row2 == left_row2 && right_col2 < left_col2)
+        \ || (right_row2 < left_row2)
+        \ || left_row2 == 0
+    let has_close = 1
+  endif
+  if has_open && has_close
+    return [left_row, left_col]
+  else
+    return [0, 0]
+  endif
+endfunction
+
+function! s:GetTagName(row, col)
+  let row = a:row
+  let col = a:col
+  let line = getline(row)
+
+  let end = col + 1
+  while line[end] =~ '\w'
+    let end += 1
+  endwhile
+  let tagname = line[col: end-1]
+  return tagname
+endfunction
+
+function! s:SearchMatchTag(tagname)
+  let tagname = a:tagname
+  let flags = 'nW'
+  if tagname[0] == '/'
+    let start = '<'.tagname[1:]
+    let end = tagname
+    let flags = flags.'b'
+
+    " Don't include '<' if search backward
+    let offset = 1
+  else
+    let start = '<'.tagname
+    let end = '/'.tagname
+    let offset = 0
+  endif
+  let [row, col] = searchpairpos(start, '', end, flags)
+
+  return [row, col, offset]
+endfunction
+
+function! s:DeleteMatch()
+  silent! call matchdelete(s:match_id)
+  silent! call matchdelete(s:match_id+1)
+endfunction
+
+function! matchtag#DisableMatchTag()
+  let g:loaded_matchtag = 0
+  autocmd! matchtag
+  call s:DeleteMatch()
+endfunction
+
+function! matchtag#EnableMatchTag()
+  let g:loaded_matchtag = 1
+
+  let filetypes = s:GetConfig('filetypes', '')
+  augroup matchtag
+    execute 'autocmd! CursorMoved,CursorMovedI,WinEnter '.filetypes
+          \.' call matchtag#HighlightMatchingTag()'
+    execute 'autocmd! Bufleave '.filetypes
+          \.' silent! call s:DeleteMatch()'
+    if exists('##TextChanged')
+      execute 'autocmd! TextChanged,TextChangedI '.filetypes
+            \.' call matchtag#HighlightMatchingTag()'
+    endif
+  augroup END
+
+  silent! doautocmd CursorMoved
+endfunction
+
+function! matchtag#ToggleMatchTag()
+  if exists('g:loaded_matchtag') && g:loaded_matchtag
+    call matchtag#Log('Disable')
+    call matchtag#DisableMatchTag()
+  else
+    call matchtag#Log('Enable')
+    call matchtag#EnableMatchTag()
+  endif
+endfunction
+
+function! matchtag#Log(msg)
+  if s:debug
+    echom '['.s:name.']['.v:lnum.'] '.a:msg
+  endif
+endfunction
+"}}}
