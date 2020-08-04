@@ -6,10 +6,6 @@
 let s:name = 'vim-matchtag'
 let s:match_id = 99
 
-let s:left_regexp = '<'
-let s:left_not_regexp = '>'
-let s:right_regexp = '\(/\)\@<!>'
-let s:right_not_regexp = '<'
 let s:tagname_regexp = '[0-9A-Za-z_.-]'
 "}}}
 
@@ -89,13 +85,13 @@ endfunction
 
 function! s:GetTagPos()
   let timeout = s:timeout
-  let has_open = 0
-  let has_close = 0
+  let has_left = 0
+  let has_right = 0
   let [left_row, left_col] = searchpos('<', 'bcnW', line('w0'), timeout)
   let [left_not_row, left_not_col] = searchpos('>', 'bnW', line('w0'), timeout)
   if (left_row == left_not_row && left_col > left_not_col) 
         \ || (left_row > left_not_row)
-    let has_open = 1
+    let has_left = 1
   endif
 
   let [right_row, right_col] = searchpos('\(/\)\@<!>', 'cnW', line('w$'), timeout)
@@ -103,9 +99,9 @@ function! s:GetTagPos()
   if (right_row == right_not_row && right_col < right_not_col)
         \ || (right_row < right_not_row)
         \ || right_not_row == 0
-    let has_close = 1
+    let has_right = 1
   endif
-  if has_open && has_close
+  if has_left && has_right
     return [left_row, left_col]
   else
     return [0, 0]
