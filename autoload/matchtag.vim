@@ -6,6 +6,16 @@
 let s:name = 'vim-matchtag'
 let s:match_id = 99
 let s:tagname_regexp = '[0-9A-Za-z_.-]'
+
+" Regexps that are used to check whether the cursor is in a tag
+" Ignore 
+" - '/>' in empty tag 
+" - '<?', '?>' in php tags
+let s:left_regexp = '<\(?\)\@!'
+let s:left_not_regexp = '\(?\)\@<!>'
+
+let s:right_regexp = '\(/\|?\)\@<!>'
+let s:right_not_regexp = '<\(?\)\@!'
 "}}}
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -56,28 +66,37 @@ function! s:HighlightTag()
 
   let [row, col] = s:GetTagPos()
   if row
-    " Current tag
+    " Find current tag
     let tagname = s:GetTagName(row, col)
-    let cursor_on_tag = cursor_row == row
-          \ && cursor_col >= col 
-          \ && cursor_col <= (col+len(tagname)+1)
-    if !cursor_on_tag || s:both
-      let pos = [[row, col+1, len(tagname)]]
-      call matchaddpos('MatchTag', pos, 10, s:match_id)
-    endif
+    call matchtag#Log('In tag '.tagname)
 
     " Set cursor to tag start to search backward correctly
     call cursor(row, col)
 
-    " Matching tag
+    " Find matching tag
     let [match_row, match_col, offset] = s:SearchMatchTag(tagname)
-    let match_tagname = s:GetTagName(match_row, match_col)
-    let match_pos = [[match_row, match_col+offset, len(match_tagname)+1-offset]]
-    call matchaddpos('MatchTag', match_pos, 10, s:match_id+1)
+    if match_row
+      let match_tagname = s:GetTagName(match_row, match_col)
 
-    let w:match_tag_hl_on = 1
-    call matchtag#Log('In tag '.tagname)
-    call matchtag#Log('Match tag '.match_tagname)
+      " Highlight tags
+      let cursor_on_tag = cursor_row == row
+            \ && cursor_col >= col 
+            \ && cursor_col <= (col+len(tagname)+1)
+      if !cursor_on_tag || s:both
+        let pos = [[row, col+1, len(tagname)]]
+        call matchaddpos('MatchTag', pos, 10, s:match_id)
+      endif
+      let match_pos = [[
+            \match_row, 
+            \match_col+offset, 
+            \len(match_tagname)+1-offset
+            \]]
+      call matchaddpos('MatchTag', match_pos, 10, s:match_id+1)
+      let w:match_tag_hl_on = 1
+      call matchtag#Log('Matching tag '.match_tagname)
+    else
+      call matchtag#Log('Matching tag Not found')
+    endif
   else
     call matchtag#Log('Not in tag pair')
   endif
@@ -89,15 +108,15 @@ function! s:GetTagPos()
   let timeout = s:timeout
   let has_left = 0
   let has_right = 0
-  let [left_row, left_col] = searchpos('<', 'bcnW', line('w0'), timeout)
-  let [left_not_row, left_not_col] = searchpos('>', 'bnW', line('w0'), timeout)
+  let [left_row, left_col] = searchpos(s:left_regexp, 'bcnW', line('w0'), timeout)
+  let [left_not_row, left_not_col] = searchpos(s:left_not_regexp, 'bnW', line('w0'), timeout)
   if (left_row == left_not_row && left_col > left_not_col) 
         \ || (left_row > left_not_row)
     let has_left = 1
   endif
 
-  let [right_row, right_col] = searchpos('\(/\)\@<!>', 'cnW', line('w$'), timeout)
-  let [right_not_row, right_not_col] = searchpos('<', 'nW', line('w$'), timeout)
+  let [right_row, right_col] = searchpos(s:right_regexp, 'cnW', line('w$'), timeout)
+  let [right_not_row, right_not_col] = searchpos(s:right_not_regexp, 'nW', line('w$'), timeout)
   if (right_row == right_not_row && right_col < right_not_col)
         \ || (right_row < right_not_row)
         \ || right_not_row == 0
@@ -106,6 +125,7 @@ function! s:GetTagPos()
   if has_left && has_right
     return [left_row, left_col]
   else
+    call matchtag#Log('Not enclosed '.has_left.','.has_right)
     return [0, 0]
   endif
 endfunction
@@ -189,7 +209,7 @@ endfunction
 
 function! matchtag#Log(msg)
   if s:debug
-    echom '['.s:name.']['.v:lnum.'] '.a:msg
+    echom '['.s:name.'] '.a:msg
   endif
 endfunction
 "}}}
