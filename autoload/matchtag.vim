@@ -48,7 +48,7 @@ endfunction
 
 function! s:HighlightTag()
   let save_cursor = getcurpos()
-  let cursor_col = save_cursor[2]
+  let [cursor_row, cursor_col] = save_cursor[1:2]
   let bracket_col = match(getline('.'), '^\s*\zs<') + 1
   if cursor_col < bracket_col
     call cursor(0, bracket_col)
@@ -58,7 +58,10 @@ function! s:HighlightTag()
   if row
     " Current tag
     let tagname = s:GetTagName(row, col)
-    if s:both
+    let cursor_on_tag = cursor_row == row
+          \ && cursor_col >= col 
+          \ && cursor_col <= (col+len(tagname)+1)
+    if !cursor_on_tag || s:both
       let pos = [[row, col+1, len(tagname)]]
       call matchaddpos('MatchTag', pos, 10, s:match_id)
     endif
