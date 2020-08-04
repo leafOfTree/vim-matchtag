@@ -31,7 +31,7 @@ let s:mapping_both = s:GetConfig('mapping_both', '<c-b>')
 let s:enable_by_default = s:GetConfig('enable_by_default', 1)
 
 " Set global variable so it can be used by other scripts
-let g:vim_matchtag_files_default = '*.html,*.xml,*.js,*.jsx,*.ts,*.tsx,*.vue,*.svelte,*.jsp'
+let g:vim_matchtag_files_default = '*.html,*.xml,*.js,*.jsx,*.ts,*.tsx,*.vue,*.svelte,*.jsp,*.php,*.erb'
 let s:files = s:GetConfig('files', g:vim_matchtag_files_default)
 "}}}
 
