@@ -1,5 +1,10 @@
 # vim-matchtag
 
+<p align="center">
+<img alt="screenshot" src="https://raw.githubusercontent.com/leafOfTree/leafOfTree.github.io/master/vim_matchtag_single.png" width="220" />
+<img alt="screenshot" src="https://raw.githubusercontent.com/leafOfTree/leafOfTree.github.io/master/vim_matchtag_single.png" width="220" />
+</p>
+
 Highlight matching tags in any files such as html, xml, js, jsx, vue, svelte.
 
 ## Installation
@@ -37,24 +42,27 @@ This plugin finds the matching tag and highlight it. Mainly inspired by vim buil
 Set global variable to `1` to enable or `0` to disalbe. Or a proper value to make it effective. Ex:
 
     let g:vim_matchtag_enable_by_default = 0
-    let g:vim_matchtag_filetypes = '*.html,*.xml,*.js,*.jsx,*.vue,*.svelte,*.jsp'
+    let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.vue,*.svelte,*.jsp'
 
-| variable                           | description                                  | default                                    |
-|------------------------------------|----------------------------------------------|--------------------------------------------|
-| `g:vim_matchtag_enable_by_default` | Enable by default.                           | 1                                          |
-| `g:vim_matchtag_mapping`           | Key mapping to toggle.                       | `'<c-t>'`                                  |
-| `g:vim_matchtag_filetypes`         | Enable on these files.                       | `'*.html,*.xml,*.js,*.jsx,*.vue,*.svelte'` |
-| `g:vim_matchtag_timeout`           | The search stops after timeout milliseconds. | `300`                                      |
-| `g:vim_matchtag_debug`             | Echo debug messages.                         | 0                                          |
+| variable                           | description                                         | default                                    |
+|------------------------------------|-----------------------------------------------------|--------------------------------------------|
+| `g:vim_matchtag_enable_by_default` | Enable by default.                                  | 1                                          |
+| `g:vim_matchtag_files`             | Enable on these files.                              | `'*.html,*.xml,*.js,*.jsx,*.vue,*.svelte'` |
+| `g:vim_matchtag_both`              | Highight both the current tag and the matching tag. | 0                                          |
+| `g:vim_matchtag_mapping_toggle`    | Key mapping to toggle highlighting.                 | `'<c-t>'`                                  |
+| `g:vim_matchtag_mapping_both`      | Key mapping to toggle `both` at runtim.         | `'<c-b>'`                                  |
+| `g:vim_matchtag_timeout`           | The search stops after timeout milliseconds.        | 300                                        |
+| `g:vim_matchtag_debug`             | Echo debug messages.                                | 0                                          |
 
 **Note**
 
-- If you prefer to enable it when necessary, you can set `g:vim_matchtag_enable_by_default` to `0` then toggle it manualy.
-- `g:vim_matchtag_filetypes` is a comma separated file pattern. See `:h autocmd-patterns` in vim.
+- If you prefer to enable it on demand, you can set `g:vim_matchtag_enable_by_default` to `0` then toggle it manualy.
+- `g:vim_matchtag_files` is a comma separated file pattern. See `:h autocmd-patterns` in vim.
+- `g:vim_matchtag_timeout` might be useful for very long lines where there can be lags.
 
 ### Highlighting
 
-You can change `matchTag` highlighting.
+You can change `matchTag` highlighting. Default is `IncSearch`.
 
 ```vim
 highlight link matchTag Search
@@ -62,3 +70,11 @@ highlight link matchTag Search
 " Or
 highlight matchTag gui=bold
 ```
+
+### Command and Mapping
+
+There are commands you can call directly or add key mapping to them.
+
+- `:MatchTagToggle` toggle highlighting.
+
+- `:MatchTagToggleBoth` toggle `both` at runtim.

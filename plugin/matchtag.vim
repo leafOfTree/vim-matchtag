@@ -26,18 +26,31 @@ function! s:GetConfig(name, default)
   return exists(name) ? eval(name) : a:default
 endfunction
 
-let s:mapping = s:GetConfig('mapping', '<c-t>')
+let s:mapping_toggle = s:GetConfig('mapping_toggle', '<c-t>')
+let s:mapping_both = s:GetConfig('mapping_both', '<c-b>')
 let s:enable_by_default = s:GetConfig('enable_by_default', 1)
+
+" Set global variable so it can be used by other scripts
+let g:vim_matchtag_files_default = '*.html,*.xml,*.js,*.jsx,*.ts,*.tsx,*.vue,*.svelte,*.jsp'
+let s:files = s:GetConfig('files', g:vim_matchtag_files_default)
 "}}}
 
 " Highlight
 highlight default link matchTag	IncSearch
 
 " Command
-command ToggleMatchTag call matchtag#ToggleMatchTag()
+command MatchTagToggle call matchtag#Toggle()
+command MatchTagToggleBoth call matchtag#ToggleBoth()
 
 " Mapping
-execute 'nnoremap '.s:mapping.' :ToggleMatchTag<cr>'
+augroup matchtag-maping
+  autocmd! matchtag-maping
+  execute 'autocmd BufNewFile,BufRead '.s:files
+        \.' nnoremap<buffer> '.s:mapping_toggle.' :MatchTagToggle<cr>'
+
+  execute 'autocmd BufNewFile,BufRead '.s:files
+        \.' nnoremap<buffer> '.s:mapping_both.' :MatchTagToggleBoth<cr>'
+augroup END
 
 " Wil be enabled by default
 if s:enable_by_default

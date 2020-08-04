@@ -1,6 +1,16 @@
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 "
-" Config {{{
+" Settings {{{
+"
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+let s:name = 'vim-matchtag'
+let s:match_id = 99
+let s:tag_regexp = '[0-9A-Za-z_-]'
+"}}}
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+"
+" Configs {{{
 "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:GetConfig(name, default)
@@ -8,8 +18,7 @@ function! s:GetConfig(name, default)
   return exists(name) ? eval(name) : a:default
 endfunction
 
-let s:name = 'vim-matchtag'
-let s:match_id = 99
+let s:both = s:GetConfig('both', 0)
 let s:debug = s:GetConfig('debug', 0)
 let s:timeout = s:GetConfig('timeout', 300)
 "}}}
@@ -44,8 +53,10 @@ function! s:HighlightTag()
   if row
     " Current tag
     let tagname = s:GetTagName(row, col)
-    let pos = [[row, col+1, len(tagname)]]
-    call matchaddpos('MatchTag', pos, 10, s:match_id)
+    if s:both
+      let pos = [[row, col+1, len(tagname)]]
+      call matchaddpos('MatchTag', pos, 10, s:match_id)
+    endif
 
     " Set cursor to tag start to search backward correctly
     call cursor(row, col)
@@ -53,7 +64,7 @@ function! s:HighlightTag()
     " Matching tag
     let [match_row, match_col, offset] = s:SearchMatchTag(tagname)
     let match_tagname = s:GetTagName(match_row, match_col)
-    let match_pos = [[match_row, match_col+offset, len(match_tagname)+1]]
+    let match_pos = [[match_row, match_col+offset, len(match_tagname)+1-offset]]
     call matchaddpos('MatchTag', match_pos, 10, s:match_id+1)
 
     let w:match_tag_hl_on = 1
@@ -97,7 +108,7 @@ function! s:GetTagName(row, col)
   let line = getline(row)
 
   let end = col + 1
-  while line[end] =~ '\w'
+  while line[end] =~ s:tag_regexp
     let end += 1
   endwhile
   let tagname = line[col: end-1]
@@ -138,14 +149,14 @@ endfunction
 function! matchtag#EnableMatchTag()
   let g:loaded_matchtag = 1
 
-  let filetypes = s:GetConfig('filetypes', '')
+  let files = s:GetConfig('files', g:vim_matchtag_files_default)
   augroup matchtag
-    execute 'autocmd! CursorMoved,CursorMovedI,WinEnter '.filetypes
+    execute 'autocmd! CursorMoved,CursorMovedI,WinEnter '.files
           \.' call matchtag#HighlightMatchingTag()'
-    execute 'autocmd! Bufleave '.filetypes
+    execute 'autocmd! Bufleave '.files
           \.' silent! call s:DeleteMatch()'
     if exists('##TextChanged')
-      execute 'autocmd! TextChanged,TextChangedI '.filetypes
+      execute 'autocmd! TextChanged,TextChangedI '.files
             \.' call matchtag#HighlightMatchingTag()'
     endif
   augroup END
@@ -153,7 +164,7 @@ function! matchtag#EnableMatchTag()
   silent! doautocmd CursorMoved
 endfunction
 
-function! matchtag#ToggleMatchTag()
+function! matchtag#Toggle()
   if exists('g:loaded_matchtag') && g:loaded_matchtag
     call matchtag#Log('Disable')
     call matchtag#DisableMatchTag()
@@ -161,6 +172,11 @@ function! matchtag#ToggleMatchTag()
     call matchtag#Log('Enable')
     call matchtag#EnableMatchTag()
   endif
+endfunction
+
+function! matchtag#ToggleBoth()
+  let s:both = 1 - s:both
+  silent! doautocmd CursorMoved
 endfunction
 
 function! matchtag#Log(msg)
