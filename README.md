@@ -66,7 +66,7 @@ Set global variable to `1` to enable or `0` to disalbe. Or a proper value to mak
 
 ### Highlighting
 
-You can change `matchTag` highlighting. Default is `IncSearch`.
+You could change `matchTag` highlighting as follows. The default is `IncSearch`.
 
 ```vim
 highlight link matchTag Search
