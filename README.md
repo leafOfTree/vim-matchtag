@@ -47,7 +47,12 @@ Set global variable to `1` to enable or `0` to disalbe. Or a proper value to mak
 | variable                           | description                                         | default                                    |
 |------------------------------------|-----------------------------------------------------|--------------------------------------------|
 | `g:vim_matchtag_enable_by_default` | Enable by default.                                  | 1                                          |
-| `g:vim_matchtag_files`             | Enable on these files.                              | `'*.html,*.xml,*.js,*.jsx,*.ts,*.tsx,*.vue,*.svelte,*.jsp,*.php,*.erb'` |
+| `g:vim_matchtag_files`             | Enable on these files.                              | See ^ |
+
+^: `'*.html,*.xml,*.js,*.jsx,*.ts,*.tsx,*.vue,*.svelte,*.jsp,*.php,*.erb'`
+
+| variable                           | description                                         | default                                    |
+|------------------------------------|-----------------------------------------------------|--------------------------------------------|
 | `g:vim_matchtag_both`              | Highight both the current tag and the matching tag. | 0                                          |
 | `g:vim_matchtag_mapping_toggle`    | Key mapping to toggle highlighting.                 | `'<c-t>'`                                  |
 | `g:vim_matchtag_mapping_both`      | Key mapping to toggle `both` at runtim.         | `'<c-b>'`                                  |
@@ -75,6 +80,6 @@ highlight matchTag gui=reverse
 
 There are commands you can call directly or add key mapping to them.
 
-- `:MatchTagToggle` toggle highlighting.
+- `:MatchTagToggle` Toggle highlighting.
 
-- `:MatchTagToggleBoth` toggle `both` at runtim.
+- `:MatchTagToggleBoth` Toggle `both` at runtim.
