@@ -5,7 +5,6 @@
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let s:name = 'vim-matchtag'
 let s:match_id = 99
-
 let s:tagname_regexp = '[0-9A-Za-z_.-]'
 "}}}
 
