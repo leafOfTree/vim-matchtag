@@ -44,25 +44,24 @@ Set global variable to `1` to enable or `0` to disalbe. Or a proper value to mak
     let g:vim_matchtag_enable_by_default = 0
     let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.vue,*.svelte,*.jsp'
 
-| variable                           | description                                         | default                                    |
-|------------------------------------|-----------------------------------------------------|--------------------------------------------|
-| `g:vim_matchtag_enable_by_default` | Enable by default.                                  | 1                                          |
-| `g:vim_matchtag_files`             | Enable on these files.                              | See ^ |
-
-^: `'*.html,*.xml,*.js,*.jsx,*.ts,*.tsx,*.vue,*.svelte,*.jsp,*.php,*.erb'`
-
-| variable                           | description                                         | default                                    |
-|------------------------------------|-----------------------------------------------------|--------------------------------------------|
-| `g:vim_matchtag_both`              | Highight both the current tag and the matching tag. | 0                                          |
-| `g:vim_matchtag_mapping_toggle`    | Key mapping to toggle highlighting.                 | `'<c-t>'`                                  |
-| `g:vim_matchtag_mapping_both`      | Key mapping to toggle `both` at runtim.         | `'<c-b>'`                                  |
-| `g:vim_matchtag_timeout`           | The search stops after timeout milliseconds.        | 300                                        |
-| `g:vim_matchtag_debug`             | Echo debug messages.                                | 0                                          |
+| variable                           | description                                         | default   |
+|------------------------------------|-----------------------------------------------------|-----------|
+| `g:vim_matchtag_enable_by_default` | Enable by default.                                  | 1         |
+| `g:vim_matchtag_files`             | Enable on these files.                              | *See ^*   |
+| `g:vim_matchtag_both`              | Highight both the current tag and the matching tag. | 0         |
+| `g:vim_matchtag_mapping_toggle`    | Key mapping to toggle highlighting.                 | `'<c-t>'` |
+| `g:vim_matchtag_mapping_both`      | Key mapping to toggle `both` at runtim.             | `'<c-b>'` |
+| `g:vim_matchtag_timeout`           | The search stops after timeout milliseconds.        | 300       |
+| `g:vim_matchtag_debug`             | Echo debug messages.                                | 0         |
 
 **Note**
 
+- ^: `g:vim_matchtag_files` defaults to `'*.html,*.xml,*.js,*.jsx,*.ts,*.tsx,*.vue,*.svelte,*.jsp,*.php,*.erb'`.
+
+    It is a comma separated file pattern. Refer to `:h autocmd-patterns` in vim.
+
 - If you prefer to enable it on demand, you can set `g:vim_matchtag_enable_by_default` to `0` then toggle it manualy.
-- `g:vim_matchtag_files` is a comma separated file pattern. See `:h autocmd-patterns` in vim.
+
 - `g:vim_matchtag_timeout` might be useful for very long lines where there can be lags.
 
 ### Highlighting
@@ -76,7 +75,7 @@ highlight link matchTag Search
 highlight matchTag gui=reverse
 ```
 
-### Command and Mapping
+### Command
 
 There are commands you can call directly or add key mapping to them.
 
