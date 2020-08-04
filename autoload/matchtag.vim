@@ -5,6 +5,11 @@
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let s:name = 'vim-matchtag'
 let s:match_id = 99
+
+let s:left_regexp = '<'
+let s:left_not_regexp = '>'
+let s:right_regexp = '\(/\)\@<!>'
+let s:right_not_regexp = '<'
 let s:tagname_regexp = '[0-9A-Za-z_.-]'
 "}}}
 
@@ -48,6 +53,11 @@ endfunction
 
 function! s:HighlightTag()
   let save_cursor = getcurpos()
+  let cursor_col = save_cursor[2]
+  let bracket_col = match(getline('.'), '^\s*\zs<') + 1
+  if cursor_col < bracket_col
+    call cursor(0, bracket_col)
+  endif
 
   let [row, col] = s:GetTagPos()
   if row
@@ -82,17 +92,17 @@ function! s:GetTagPos()
   let has_open = 0
   let has_close = 0
   let [left_row, left_col] = searchpos('<', 'bcnW', line('w0'), timeout)
-  let [right_row, right_col] = searchpos('>', 'bnW', line('w0'), timeout)
-  if (left_row == right_row && left_col > right_col) 
-        \ || (left_row > right_row)
+  let [left_not_row, left_not_col] = searchpos('>', 'bnW', line('w0'), timeout)
+  if (left_row == left_not_row && left_col > left_not_col) 
+        \ || (left_row > left_not_row)
     let has_open = 1
   endif
 
-  let [left_row2, left_col2] = searchpos('<', 'nW', line('w$'), timeout)
-  let [right_row2, right_col2] = searchpos('\(/\)\@<!>', 'cnW', line('w$'), timeout)
-  if (right_row2 == left_row2 && right_col2 < left_col2)
-        \ || (right_row2 < left_row2)
-        \ || left_row2 == 0
+  let [right_row, right_col] = searchpos('\(/\)\@<!>', 'cnW', line('w$'), timeout)
+  let [right_not_row, right_not_col] = searchpos('<', 'nW', line('w$'), timeout)
+  if (right_row == right_not_row && right_col < right_not_col)
+        \ || (right_row < right_not_row)
+        \ || right_not_row == 0
     let has_close = 1
   endif
   if has_open && has_close
