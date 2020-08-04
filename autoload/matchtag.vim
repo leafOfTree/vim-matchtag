@@ -5,7 +5,7 @@
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let s:name = 'vim-matchtag'
 let s:match_id = 99
-let s:tag_regexp = '[0-9A-Za-z_.-]'
+let s:tagname_regexp = '[0-9A-Za-z_.-]'
 "}}}
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -108,7 +108,7 @@ function! s:GetTagName(row, col)
   let line = getline(row)
 
   let end = col + 1
-  while line[end] =~ s:tag_regexp
+  while line[end] =~ s:tagname_regexp
     let end += 1
   endwhile
   let tagname = line[col: end-1]
