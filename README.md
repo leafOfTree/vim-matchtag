@@ -92,6 +92,10 @@ There are commands you can call directly or add key mapping to.
 
 - `:MatchTagToggleBoth` Toggle `both` at runtim.
 
+## Others
+
+- Jump between matching tags? See `:h matchit`.
+
 ## Credits
 
 - matchparen.vim
