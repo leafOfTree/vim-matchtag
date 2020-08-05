@@ -13,16 +13,16 @@ Highlight matching tags in any files such as html, xml, js, jsx, vue, svelte.
 <details>
 <summary><a>How to install</a></summary>
 
-- [VundleVim][2]
+- [VundleVim][1]
 
         Plugin 'leafOfTree/vim-matchtag'
 
-- [vim-pathogen][5]
+- [vim-pathogen][2]
 
         cd ~/.vim/bundle && \
         git clone https://github.com/leafOfTree/vim-matchtag --depth 1
 
-- [vim-plug][7]
+- [vim-plug][3]
 
         Plug 'leafOfTree/vim-matchtag'
 
@@ -85,3 +85,7 @@ There are commands you can call directly or add key mapping to.
 - `:MatchTagToggle` Toggle highlighting.
 
 - `:MatchTagToggleBoth` Toggle `both` at runtim.
+
+[1]: https://github.com/VundleVim/Vundle.vim
+[2]: https://github.com/tpope/vim-pathogen
+[3]: https://github.com/junegunn/vim-plug
