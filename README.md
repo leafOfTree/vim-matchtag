@@ -37,7 +37,7 @@ Highlight matching tags in any files such as html, xml, js, jsx, vue, svelte.
 
 This plugin finds the matching tag and highlight it. Mainly inspired by vim builtin `matchparen` using `searchpairpos` and `matchaddpos`. Feel free to open an issue or a pull request.
 
-## Configure
+## Configuration
 
 Set global variable to `1` to enable or `0` to disalbe. Or a proper value to make it effective. Ex:
 
