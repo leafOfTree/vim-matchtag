@@ -50,7 +50,7 @@ let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.vue,*.svelte,*.jsp'
 |------------------------------------|------------------------------------------------------------|-----------|
 | `g:vim_matchtag_enable_by_default` | Enable by default.                                         | 1         |
 | `g:vim_matchtag_files`             | Enable on these files.                                     | *See ^*   |
-| `g:vim_matchtag_both`              | Always highight both the current tag and the matching tag. | 0         |
+| `g:vim_matchtag_both`              | Always highight both the current tag and the matching tag. `0` means the current tag won't be highighted if the cursor is on its tagname.| 0         |
 | `g:vim_matchtag_mapping_toggle`    | Key mapping to toggle highlighting.                        | `'<c-t>'` |
 | `g:vim_matchtag_mapping_both`      | Key mapping to toggle `both` at runtim.                    | `'<c-b>'` |
 | `g:vim_matchtag_timeout`           | The search stops after timeout milliseconds.               | 300       |
@@ -63,8 +63,6 @@ let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.vue,*.svelte,*.jsp'
     It is a comma separated file pattern. Refer to `:h autocmd-patterns` in vim.
 
 - If you prefer to enable it on demand, you can set `g:vim_matchtag_enable_by_default` to `0` then toggle it manualy.
-
-- `g:vim_matchtag_both` defaults to `0`, which means the current tag won't be highighted if the cursor is on its tagname.
 
 - `g:vim_matchtag_timeout` might be useful for very long lines where there can be lags.
 
