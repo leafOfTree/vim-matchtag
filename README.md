@@ -92,6 +92,10 @@ There are commands you can call directly or add key mapping to.
 
 - `:MatchTagToggleBoth` Toggle `both` at runtim.
 
+## Credits
+
+- matchparen.vim
+
 [1]: https://github.com/VundleVim/Vundle.vim
 [2]: https://github.com/tpope/vim-pathogen
 [3]: https://github.com/junegunn/vim-plug
