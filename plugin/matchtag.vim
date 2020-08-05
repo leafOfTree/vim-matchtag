@@ -37,7 +37,7 @@ let s:files = s:GetConfig('files', g:vim_matchtag_files_default)
 
 " Highlight
 highlight default link matchTag	IncSearch
-highlight default link matchTagWarning	Error
+highlight default link matchTagWarning Error
 
 " Command
 command MatchTagToggle call matchtag#Toggle()
