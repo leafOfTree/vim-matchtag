@@ -114,26 +114,37 @@ function! s:IsEmptyPos(pos)
   return row == 0 && col == 0
 endfunction
 
+function! s:NotAfter(main, excludes)
+  let regexp = '\('.join(split(a:excludes, ','), '\|').'\)'
+  return a:main.regexp.'\@!'
+endfunction
 
-" Regexps that are used to check whether the cursor is in a tag
+function! s:NotBefore(main, excludes)
+  let regexp = '\('.join(split(a:excludes, ','), '\|').'\)'
+  return regexp.'\@<!'.a:main
+endfunction
+
+" Regexps that are used to check whether the cursor is on a tag
 " Ignore 
 " - '/>' in empty tag 
 " - '<?', '?>' in php tags
-function! s:GetTagPos(check_in_tag)
+" - '<!--', '-->' in html comments
+" - '=>' in JavaScript
+function! s:GetTagPos(check_nearby_tag)
   call matchtag#Log('GetTagPos ---------')
-
   let timeout = s:timeout
-  let open_bracket = searchpos('<\(?\)\@!', 'bcnW', line('w0'), timeout)
+
+  let open_bracket = searchpos(s:NotAfter('<', '?,!'), 'bcnW', line('w0'), timeout)
   if s:IsEmptyPos(open_bracket)
     call matchtag#Log('Not on/in tag, no open bracket')
     return [0,0]
   endif
-  let close_bracket = searchpos('\(?\)\@<!>', 'bnW', line('w0'), timeout)
+  let close_bracket = searchpos(s:NotBefore('>', '?,='), 'bnW', line('w0'), timeout)
   let has_nearby_open = s:IsAheadOf(close_bracket, open_bracket)
   let has_nearby_close = !has_nearby_open
 
-  let open_bracket_forward = searchpos('<\(?\)\@!', 'nW', line('w$'), timeout)
-  let close_bracket_forward = searchpos('\(/\|?\)\@<!>', 'cnW', line('w$'), timeout)
+  let open_bracket_forward = searchpos(s:NotAfter('<', '?'), 'nW', line('w$'), timeout)
+  let close_bracket_forward = searchpos(s:NotBefore('>', '/,?,-,='), 'cnW', line('w$'), timeout)
   if s:IsEmptyPos(close_bracket_forward)
     call matchtag#Log('Not on/in tag, no close bracket')
     return [0,0]
@@ -147,21 +158,22 @@ function! s:GetTagPos(check_in_tag)
     return open_bracket
   endif
 
-  if has_nearby_close && a:check_in_tag
+  if has_nearby_open_forward && a:check_nearby_tag
+    let line = getline(open_bracket_forward[0])
+    let is_close_tag = line[open_bracket_forward[1]] == '/'
+    if is_close_tag
+      call cursor(open_bracket_forward)
+      call matchtag#Log('Move to close tag ->')
+      return s:GetTagPos(0)
+    endif
+  endif
+  if has_nearby_close && a:check_nearby_tag
     let line = getline(open_bracket[0])
     let is_open_tag = line[open_bracket[1]] != '/'
     if is_open_tag
       call cursor(close_bracket)
       call matchtag#Log('Move to open tag ->')
       return s:GetTagPos(0)
-    elseif has_nearby_open_forward
-      let line = getline(open_bracket_forward[0])
-      let is_close_tag = line[open_bracket_forward[1]] == '/'
-      if is_close_tag
-        call cursor(open_bracket_forward)
-        call matchtag#Log('Move to close tag ->')
-        return s:GetTagPos(0)
-      endif
     endif
   endif
 
