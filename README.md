@@ -50,9 +50,9 @@ let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.vue,*.svelte,*.jsp'
 |------------------------------------|------------------------------------------------------------|-----------|
 | `g:vim_matchtag_enable_by_default` | Enable by default.                                         | 1         |
 | `g:vim_matchtag_files`             | Enable on these files.                                     | *See ^*   |
-| `g:vim_matchtag_both`              | Always highight both the current tag and the matching tag. `0` means the current tag won't be highighted if the cursor is on its tagname.| 0         |
-| `g:vim_matchtag_mapping_toggle`    | Key mapping to toggle highlighting.                        | '<c-t>' |
-| `g:vim_matchtag_mapping_both`      | Key mapping to toggle `both` at runtim.                    | '<c-b>' |
+| `g:vim_matchtag_both`              | Highight both the current tag and the matching tag. <br>`0` means the current tag won't be highighted <br>if the cursor is on its tagname.| 0         |
+| `g:vim_matchtag_mapping_toggle`    | Key mapping to toggle highlighting.                        | `'<c-t>'` |
+| `g:vim_matchtag_mapping_both`      | Key mapping to toggle `both` at runtim.                    | `'<c-b>'` |
 | `g:vim_matchtag_timeout`           | The search stops after timeout milliseconds.               | 300       |
 | `g:vim_matchtag_debug`             | Echo debug messages.                                       | 0         |
 
