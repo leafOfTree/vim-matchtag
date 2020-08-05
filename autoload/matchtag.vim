@@ -87,7 +87,7 @@ function! s:HighlightTag()
       call matchtag#Log('Matching tag '.match_tagname)
     else
       let w:matchtag_hl_on = 1
-      call matchaddpos('MatchTagWarning', pos, 10, s:match_id)
+      call matchaddpos('MatchTagError', pos, 10, s:match_id)
       call matchtag#Log('Matching tag Not found')
     endif
   endif

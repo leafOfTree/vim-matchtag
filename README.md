@@ -78,6 +78,12 @@ highlight link matchTag MatchParen
 highlight matchTag gui=reverse
 ```
 
+If the matching tag is not found, the current tag will be highlighted as `matchTagError`, which defaults to `Error`.
+
+```vim
+highlight link matchTagError Todo
+```
+
 ### Command
 
 There are commands you can call directly or add key mapping to.
