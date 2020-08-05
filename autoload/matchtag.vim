@@ -7,15 +7,6 @@ let s:name = 'vim-matchtag'
 let s:match_id = 99
 let s:tagname_regexp = '[0-9A-Za-z_.-]'
 
-" Regexps that are used to check whether the cursor is in a tag
-" Ignore 
-" - '/>' in empty tag 
-" - '<?', '?>' in php tags
-let s:left_regexp = '<\(?\)\@!'
-let s:left_not_regexp = '\(?\)\@<!>'
-
-let s:right_regexp = '\(/\|?\)\@<!>'
-let s:right_not_regexp = '<\(?\)\@!'
 "}}}
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -42,9 +33,9 @@ let s:timeout = s:GetConfig('timeout', 300)
 " highlighting for any matching tag.
 function! matchtag#HighlightMatchingTag()
   " Remove any previous match.
-  if exists('w:match_tag_hl_on') && w:match_tag_hl_on
+  if exists('w:matchtag_hl_on') && w:matchtag_hl_on
     silent! call s:DeleteMatch()
-    let w:match_tag_hl_on = 0
+    let w:matchtag_hl_on = 0
   endif
 
   " Avoid removing the popup menu.
@@ -64,11 +55,12 @@ function! s:HighlightTag()
     call cursor(0, bracket_col)
   endif
 
-  let [row, col] = s:GetTagPos()
+  let [row, col] = s:GetTagPos(1)
   if row
     " Find current tag
     let tagname = s:GetTagName(row, col)
-    call matchtag#Log('In tag '.tagname)
+    let pos = [[row, col+1, len(tagname)]]
+    call matchtag#Log('On tag '.tagname)
 
     " Set cursor to tag start to search backward correctly
     call cursor(row, col)
@@ -83,7 +75,6 @@ function! s:HighlightTag()
             \ && cursor_col >= col 
             \ && cursor_col <= (col+len(tagname)+1)
       if !cursor_on_tag || s:both
-        let pos = [[row, col+1, len(tagname)]]
         call matchaddpos('MatchTag', pos, 10, s:match_id)
       endif
       let match_pos = [[
@@ -92,42 +83,90 @@ function! s:HighlightTag()
             \len(match_tagname)+1-offset
             \]]
       call matchaddpos('MatchTag', match_pos, 10, s:match_id+1)
-      let w:match_tag_hl_on = 1
+      let w:matchtag_hl_on = 1
       call matchtag#Log('Matching tag '.match_tagname)
     else
+      let w:matchtag_hl_on = 1
+      call matchaddpos('MatchTagWarning', pos, 10, s:match_id)
       call matchtag#Log('Matching tag Not found')
     endif
-  else
-    call matchtag#Log('Not in tag pair')
   endif
 
   call setpos('.', save_cursor)
 endfunction
 
-function! s:GetTagPos()
+" Compare two positions
+" 0: pos1 is after pos2
+" 1: pos1 is ahead of pos2
+function! s:IsAheadOf(pos1, pos2)
+  let [row1, col1] = a:pos1
+  let [row2, col2] = a:pos2
+  if row1 == row2 && col1 > col2
+        \ || row1 > row2
+    return 0
+  else
+    return 1
+  endif
+endfunction
+
+function! s:IsEmptyPos(pos)
+  let [row, col] = a:pos
+  return row == 0 && col == 0
+endfunction
+
+
+" Regexps that are used to check whether the cursor is in a tag
+" Ignore 
+" - '/>' in empty tag 
+" - '<?', '?>' in php tags
+function! s:GetTagPos(check_in_tag)
+  call matchtag#Log('GetTagPos ---------')
+
   let timeout = s:timeout
-  let has_left = 0
-  let has_right = 0
-  let [left_row, left_col] = searchpos(s:left_regexp, 'bcnW', line('w0'), timeout)
-  let [left_not_row, left_not_col] = searchpos(s:left_not_regexp, 'bnW', line('w0'), timeout)
-  if (left_row == left_not_row && left_col > left_not_col) 
-        \ || (left_row > left_not_row)
-    let has_left = 1
+  let open_bracket = searchpos('<\(?\)\@!', 'bcnW', line('w0'), timeout)
+  if s:IsEmptyPos(open_bracket)
+    call matchtag#Log('Not on/in tag, no open bracket')
+    return [0,0]
+  endif
+  let close_bracket = searchpos('\(?\)\@<!>', 'bnW', line('w0'), timeout)
+  let has_nearby_open = s:IsAheadOf(close_bracket, open_bracket)
+  let has_nearby_close = !has_nearby_open
+
+  let open_bracket_forward = searchpos('<\(?\)\@!', 'nW', line('w$'), timeout)
+  let close_bracket_forward = searchpos('\(/\|?\)\@<!>', 'cnW', line('w$'), timeout)
+  if s:IsEmptyPos(close_bracket_forward)
+    call matchtag#Log('Not on/in tag, no close bracket')
+    return [0,0]
+  endif
+  let has_nearby_close_forward = s:IsAheadOf(close_bracket_forward, open_bracket_forward)
+        \ || s:IsEmptyPos(open_bracket_forward)
+  let has_nearby_open_forward = !has_nearby_close_forward
+
+  if has_nearby_open && has_nearby_close_forward
+    call matchtag#Log('On tag')
+    return open_bracket
   endif
 
-  let [right_row, right_col] = searchpos(s:right_regexp, 'cnW', line('w$'), timeout)
-  let [right_not_row, right_not_col] = searchpos(s:right_not_regexp, 'nW', line('w$'), timeout)
-  if (right_row == right_not_row && right_col < right_not_col)
-        \ || (right_row < right_not_row)
-        \ || right_not_row == 0
-    let has_right = 1
+  if has_nearby_close && a:check_in_tag
+    let line = getline(open_bracket[0])
+    let is_open_tag = line[open_bracket[1]] != '/'
+    if is_open_tag
+      call cursor(close_bracket)
+      call matchtag#Log('Move to open tag ->')
+      return s:GetTagPos(0)
+    elseif has_nearby_open_forward
+      let line = getline(open_bracket_forward[0])
+      let is_close_tag = line[open_bracket_forward[1]] == '/'
+      if is_close_tag
+        call cursor(open_bracket_forward)
+        call matchtag#Log('Move to close tag ->')
+        return s:GetTagPos(0)
+      endif
+    endif
   endif
-  if has_left && has_right
-    return [left_row, left_col]
-  else
-    call matchtag#Log('Not enclosed '.has_left.','.has_right)
-    return [0, 0]
-  endif
+
+  call matchtag#Log('Not on/in tag '.has_nearby_open.', '.has_nearby_close_forward)
+  return [0, 0]
 endfunction
 
 function! s:GetTagName(row, col)
