@@ -106,11 +106,10 @@ endfunction
 function! s:IsAheadOf(pos1, pos2)
   let [row1, col1] = a:pos1
   let [row2, col2] = a:pos2
-  if row1 == row2 && col1 > col2
-        \ || row1 > row2
-    return 0
-  else
+  if row2 > row1 || (row2 == row1 && col2 > col1)
     return 1
+  else
+    return 0
   endif
 endfunction
 
@@ -135,21 +134,29 @@ endfunction
 " - '<?', '?>' in php tags
 " - '<!--', '-->' in html comments
 " - '=>' in JavaScript
+let s:open_bracket_regexp = s:NotAfter('<', '?,!')
+let s:close_bracket_regexp = s:NotBefore('>', '?,=')
+let s:open_bracket_forward_regexp = s:NotAfter('<', '?')
+let s:close_bracket_forward_regexp = s:NotBefore('>', '/,?,-,=')
 function! s:GetTagPos(check_nearby_tag)
   call matchtag#Log('GetTagPos ---------')
   let timeout = s:timeout
+  let firstline = line('w0')
+  let lastline = line('w$')
 
-  let open_bracket = searchpos(s:NotAfter('<', '?,!'), 'bcnW', line('w0'), timeout)
+  " Search for '<' backward
+  let open_bracket = searchpos(s:open_bracket_regexp, 'bcnW', firstline, timeout)
   if s:IsEmptyPos(open_bracket)
     call matchtag#Log('Not on/in tag, no open bracket')
     return [0,0]
   endif
-  let close_bracket = searchpos(s:NotBefore('>', '?,='), 'bnW', line('w0'), timeout)
+  let close_bracket = searchpos(s:close_bracket_regexp, 'bnW', firstline, timeout)
   let has_nearby_open = s:IsAheadOf(close_bracket, open_bracket)
   let has_nearby_close = !has_nearby_open
 
-  let open_bracket_forward = searchpos(s:NotAfter('<', '?'), 'nW', line('w$'), timeout)
-  let close_bracket_forward = searchpos(s:NotBefore('>', '/,?,-,='), 'cnW', line('w$'), timeout)
+  " Search for '>' forward
+  let open_bracket_forward = searchpos(s:open_bracket_forward_regexp, 'nW', lastline, timeout)
+  let close_bracket_forward = searchpos(s:close_bracket_forward_regexp, 'cnW', lastline, timeout)
   if s:IsEmptyPos(close_bracket_forward)
     call matchtag#Log('Not on/in tag, no close bracket')
     return [0,0]
