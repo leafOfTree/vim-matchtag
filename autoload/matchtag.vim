@@ -6,6 +6,7 @@
 let s:name = 'vim-matchtag'
 let s:match_id = 99
 let s:tagname_regexp = '[0-9A-Za-z_.-]'
+let s:empty_tagname = '\v<(area|base|br|col|embed|hr|input|img|keygen|link|meta|param|source|track|wbr)>'
 
 "}}}
 
@@ -86,9 +87,13 @@ function! s:HighlightTag()
       let w:matchtag_hl_on = 1
       call matchtag#Log('Matching tag '.match_tagname)
     else
-      let w:matchtag_hl_on = 1
-      call matchaddpos('MatchTagError', pos, 10, s:match_id)
-      call matchtag#Log('Matching tag Not found')
+      if match(tagname, s:empty_tagname) != -1
+        call matchtag#Log('Current tag is empty')
+      else
+        let w:matchtag_hl_on = 1
+        call matchaddpos('MatchTagError', pos, 10, s:match_id)
+        call matchtag#Log('Matching tag Not found')
+      endif
     endif
   endif
 
