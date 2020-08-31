@@ -86,19 +86,19 @@ function! s:HighlightTag()
             \len(match_tagname)+1-offset
             \]]
       call matchaddpos('MatchTag', match_pos, 10, s:match_id+1)
-      let w:matchtag_hl_on = 1
       call matchtag#Log('Matching tag '.match_tagname)
     else
       if match(tagname, s:empty_tagname) != -1
         " Current tag is emtpy
+        call matchaddpos('MatchTag', pos, 10, s:match_id)
         call matchtag#Log('Current tag is empty')
       else
         " Matching tag not found
         call matchaddpos('MatchTagError', pos, 10, s:match_id)
-        let w:matchtag_hl_on = 1
         call matchtag#Log('Matching tag Not found')
       endif
     endif
+    let w:matchtag_hl_on = 1
   endif
 
   call setpos('.', save_cursor)
@@ -141,7 +141,7 @@ endfunction
 let s:open_bracket_regexp = s:NotAfter('<', '?,!')
 let s:close_bracket_regexp = s:NotBefore('>', '?,=')
 let s:open_bracket_forward_regexp = s:NotAfter('<', '?')
-let s:close_bracket_forward_regexp = s:NotBefore('>', '/,?,-,=')
+let s:close_bracket_forward_regexp = s:NotBefore('>', '?,-,=')
 function! s:GetTagPos(check_nearby_tag)
   call matchtag#Log('GetTagPos ---------')
 
