@@ -144,6 +144,12 @@ let s:open_bracket_forward_regexp = s:NotAfter('<', '?')
 let s:close_bracket_forward_regexp = s:NotBefore('>', '/,?,-,=')
 function! s:GetTagPos(check_nearby_tag)
   call matchtag#Log('GetTagPos ---------')
+
+  if s:IsInComment()
+    call matchtag#Log('In coment, skip')
+    return [0,0]
+  endif
+
   let timeout = s:timeout
   let firstline = line('w0')
   let lastline = line('w$')
@@ -225,21 +231,21 @@ function! s:SearchMatchTag(tagname)
     let end = '/'.tagname
     let offset = 0
   endif
-  let [row, col] = searchpairpos(start, '', end, flags, function('s:Skip'))
+  let [row, col] = searchpairpos(start, '', end, flags, function('s:IsInComment'))
 
   return [row, col, offset]
 endfunction
 
-function! s:Skip()
-  let skip = 0
+function! s:IsInComment()
+  let comment = 0
   for id in synstack(line('.'), col('.'))
     let syn = synIDattr(id, 'name')
     if syn =~ 'comment$'
-      let skip = 1
+      let comment = 1
       break
     endif
   endfor
-  return skip
+  return comment
 endfunction
 
 function! s:DeleteMatch()
