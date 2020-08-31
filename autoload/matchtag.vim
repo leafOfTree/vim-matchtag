@@ -72,12 +72,14 @@ function! s:HighlightTag()
       let match_tagname = s:GetTagName(match_row, match_col)
 
       " Highlight tags
+      " Current
       let cursor_on_tag = cursor_row == row
             \ && cursor_col >= col 
             \ && cursor_col <= (col+len(tagname)+1)
       if !cursor_on_tag || s:both
         call matchaddpos('MatchTag', pos, 10, s:match_id)
       endif
+      " Matching
       let match_pos = [[
             \match_row, 
             \match_col+offset, 
@@ -88,10 +90,12 @@ function! s:HighlightTag()
       call matchtag#Log('Matching tag '.match_tagname)
     else
       if match(tagname, s:empty_tagname) != -1
+        " Current tag is emtpy
         call matchtag#Log('Current tag is empty')
       else
-        let w:matchtag_hl_on = 1
+        " Matching tag not found
         call matchaddpos('MatchTagError', pos, 10, s:match_id)
+        let w:matchtag_hl_on = 1
         call matchtag#Log('Matching tag Not found')
       endif
     endif
@@ -221,9 +225,21 @@ function! s:SearchMatchTag(tagname)
     let end = '/'.tagname
     let offset = 0
   endif
-  let [row, col] = searchpairpos(start, '', end, flags)
+  let [row, col] = searchpairpos(start, '', end, flags, function('s:Skip'))
 
   return [row, col, offset]
+endfunction
+
+function! s:Skip()
+  let skip = 0
+  for id in synstack(line('.'), col('.'))
+    let syn = synIDattr(id, 'name')
+    if syn =~ 'comment$'
+      let skip = 1
+      break
+    endif
+  endfor
+  return skip
 endfunction
 
 function! s:DeleteMatch()
