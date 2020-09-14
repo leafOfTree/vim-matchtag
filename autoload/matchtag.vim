@@ -51,15 +51,18 @@ endfunction
 function! s:HighlightTag()
   let save_cursor = getcurpos()
   let [cursor_row, cursor_col] = save_cursor[1:2]
-  let bracket_col = match(getline('.'), '^\s*\zs<') + 1
-  if cursor_col < bracket_col
-    call cursor(0, bracket_col)
+  if cursor_col < min([cursor_row * &shiftwidth, 40])
+    let bracket_col = match(getline('.'), '^\s*\zs<') + 1
+    if cursor_col < bracket_col
+      call cursor(0, bracket_col)
+    endif
   endif
 
   let [row, col] = s:GetTagPos(1)
   if row
     " Find current tag
-    let tagname = s:GetTagName(row, col)
+    let line = getline(row)
+    let tagname = s:GetTagName(line, col)
     let pos = [[row, col+1, len(tagname)]]
     call matchtag#Log('On tag '.tagname)
 
@@ -69,17 +72,18 @@ function! s:HighlightTag()
     " Find matching tag
     let [match_row, match_col, offset] = s:SearchMatchTag(tagname)
     if match_row
-      let match_tagname = s:GetTagName(match_row, match_col)
+      let match_line = match_row == row ? line : getline(match_row)
+      let match_tagname = s:GetTagName(match_line, match_col)
 
       " Highlight tags
-      " Current
+      " Current tag
       let cursor_on_tag = cursor_row == row
             \ && cursor_col >= col 
             \ && cursor_col <= (col+len(tagname)+1)
       if !cursor_on_tag || s:both
         call matchaddpos('MatchTag', pos, 10, s:match_id)
       endif
-      " Matching
+      " Matching tag
       let match_pos = [[
             \match_row, 
             \match_col+offset, 
@@ -122,6 +126,12 @@ function! s:IsEmptyPos(pos)
   return row == 0 && col == 0
 endfunction
 
+function! s:IsSamePos(pos1, pos2)
+  let [row1, col1] = a:pos1
+  let [row2, col2] = a:pos2
+  return row1 == row2 && col1 == col2
+endfunction
+
 function! s:NotAfter(main, excludes)
   let regexp = '\('.join(split(a:excludes, ','), '\|').'\)'
   return a:main.regexp.'\@!'
@@ -140,8 +150,9 @@ endfunction
 " - '=>' in JavaScript
 let s:open_bracket_regexp = s:NotAfter('<', '?,!')
 let s:close_bracket_regexp = s:NotBefore('>', '?,=')
-let s:open_bracket_forward_regexp = s:NotAfter('<', '?')
+let s:open_bracket_forward_regexp = s:NotAfter('</', '?')
 let s:close_bracket_forward_regexp = s:NotBefore('>', '?,-,=')
+
 function! s:GetTagPos(check_nearby_tag)
   call matchtag#Log('GetTagPos ---------')
 
@@ -155,58 +166,60 @@ function! s:GetTagPos(check_nearby_tag)
   let lastline = line('w$')
 
   " Search for '<' backward
-  let open_bracket = searchpos(s:open_bracket_regexp, 'bcnW', firstline, timeout)
-  if s:IsEmptyPos(open_bracket)
-    call matchtag#Log('Not on/in tag, no open bracket')
-    return [0,0]
-  endif
+  let open_bracket = searchpos(s:open_bracket_regexp, 'cbnW', firstline, timeout)
+  " Search for '>' backward
   let close_bracket = searchpos(s:close_bracket_regexp, 'bnW', firstline, timeout)
   let has_nearby_open = s:IsAheadOf(close_bracket, open_bracket)
   let has_nearby_close = !has_nearby_open
 
-  " Search for '>' forward
+  " Search for '<' forward
   let open_bracket_forward = searchpos(s:open_bracket_forward_regexp, 'nW', lastline, timeout)
+  " Search for '>' forward
   let close_bracket_forward = searchpos(s:close_bracket_forward_regexp, 'cnW', lastline, timeout)
-  if s:IsEmptyPos(close_bracket_forward)
-    call matchtag#Log('Not on/in tag, no close bracket')
-    return [0,0]
-  endif
   let has_nearby_close_forward = s:IsAheadOf(close_bracket_forward, open_bracket_forward)
         \ || s:IsEmptyPos(open_bracket_forward)
   let has_nearby_open_forward = !has_nearby_close_forward
 
+  " On tag
   if has_nearby_open && has_nearby_close_forward
     call matchtag#Log('On tag')
     return open_bracket
   endif
 
-  if has_nearby_open_forward && a:check_nearby_tag
-    let line = getline(open_bracket_forward[0])
-    let is_close_tag = line[open_bracket_forward[1]] == '/'
-    if is_close_tag
-      call cursor(open_bracket_forward)
-      call matchtag#Log('Move to close tag ->')
-      return s:GetTagPos(0)
+  " Check if in tag
+  " Check forward
+  if has_nearby_open_forward
+    call matchtag#Log('Move to close tag forward ')
+    return open_bracket_forward
+  endif
+  " Check backward
+  if has_nearby_close
+    let open_bracket_of_closetag
+          \ = searchpos('</', 'bcnW', firstline, timeout)
+
+    if !s:IsSamePos(open_bracket, open_bracket_of_closetag)
+      call matchtag#Log('Move to open tag backward')
+      return open_bracket
     endif
   endif
-  if has_nearby_close && a:check_nearby_tag
-    let line = getline(open_bracket[0])
-    let is_open_tag = line[open_bracket[1]] != '/'
-    if is_open_tag
-      call cursor(close_bracket)
-      call matchtag#Log('Move to open tag ->')
-      return s:GetTagPos(0)
-    endif
+
+  " Not on/in tag
+  if s:IsEmptyPos(open_bracket)
+    call matchtag#Log('Not on/in tag, no open bracket')
+    return [0,0]
+  endif
+  if s:IsEmptyPos(close_bracket_forward)
+    call matchtag#Log('Not on/in tag, no close bracket')
+    return [0,0]
   endif
 
   call matchtag#Log('Not on/in tag '.has_nearby_open.', '.has_nearby_close_forward)
   return [0, 0]
 endfunction
 
-function! s:GetTagName(row, col)
-  let row = a:row
+function! s:GetTagName(line, col)
+  let line = a:line
   let col = a:col
-  let line = getline(row)
 
   let end = col + 1
   while line[end] =~ s:tagname_regexp
