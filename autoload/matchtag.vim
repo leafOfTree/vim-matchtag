@@ -7,6 +7,7 @@ let s:name = 'vim-matchtag'
 let s:match_id = 99
 let s:tagname_regexp = '[0-9A-Za-z_.-]'
 let s:empty_tagname = '\v<(area|base|br|col|embed|hr|input|img|keygen|link|meta|param|source|track|wbr)>'
+let s:exists_text_changed = exists('##TextChanged')
 
 "}}}
 
@@ -48,11 +49,37 @@ function! matchtag#HighlightMatchingTag()
   call s:HighlightTag()
 endfunction
 
+
+if s:exists_text_changed
+  " Cache lines when exists TextChanged
+  let s:cached_lines = {}
+
+  function! s:ResetLineCache()
+    let s:cached_lines = {}
+  endfunction
+
+  function! s:GetLine(number)
+    let number = a:number
+    if has_key(s:cached_lines, number)
+      return s:cached_lines[number]
+    else
+      let line = getline(number)
+      let s:cached_lines[number] = line
+      return line
+    endif
+  endfunction
+else
+  function! s:GetLine(number)
+    return getline(a:number)
+  endfunction
+endif
+
 function! s:HighlightTag()
   let save_cursor = getcurpos()
+
   let [cursor_row, cursor_col] = save_cursor[1:2]
-  if cursor_col < min([cursor_row * &shiftwidth, 40])
-    let bracket_col = match(getline('.'), '^\s*\zs<') + 1
+  if cursor_col < min([cursor_row * &shiftwidth, 20])
+    let bracket_col = searchpos('^\s\+\zs<', 'n', cursor_row, s:timeout)[1]
     if cursor_col < bracket_col
       call cursor(0, bracket_col)
     endif
@@ -61,7 +88,7 @@ function! s:HighlightTag()
   let [row, col] = s:GetTagPos(1)
   if row
     " Find current tag
-    let line = getline(row)
+    let line = s:GetLine(row)
     let tagname = s:GetTagName(line, col)
     let pos = [[row, col+1, len(tagname)]]
     call matchtag#Log('On tag '.tagname)
@@ -72,7 +99,9 @@ function! s:HighlightTag()
     " Find matching tag
     let [match_row, match_col, offset] = s:SearchMatchTag(tagname)
     if match_row
-      let match_line = match_row == row ? line : getline(match_row)
+      let match_line = match_row == row 
+            \ ? line 
+            \ : s:GetLine(match_row)
       let match_tagname = s:GetTagName(match_line, match_col)
 
       " Highlight tags
@@ -277,13 +306,18 @@ function! matchtag#EnableMatchTag()
 
   let files = s:GetConfig('files', g:vim_matchtag_files_default)
   augroup matchtag
+    autocmd! matchtag
     execute 'autocmd! CursorMoved,CursorMovedI,WinEnter '.files
           \.' call matchtag#HighlightMatchingTag()'
     execute 'autocmd! Bufleave '.files
-          \.' silent! call s:DeleteMatch()'
-    if exists('##TextChanged')
+          \.' call s:DeleteMatch()'
+    if s:exists_text_changed
       execute 'autocmd! TextChanged,TextChangedI '.files
-            \.' call matchtag#HighlightMatchingTag()'
+            \.' call s:ResetLineCache()'
+            \.'|call matchtag#HighlightMatchingTag()'
+
+      execute 'autocmd! Bufleave '.files
+            \.' call s:ResetLineCache()'
     endif
   augroup END
 
@@ -311,3 +345,4 @@ function! matchtag#Log(msg)
   endif
 endfunction
 "}}}
+" vim: fdm=marker
