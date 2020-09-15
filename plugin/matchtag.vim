@@ -30,7 +30,7 @@ let s:mapping_toggle = s:GetConfig('mapping_toggle', '<c-t>')
 let s:mapping_both = s:GetConfig('mapping_both', '<c-b>')
 let s:enable_by_default = s:GetConfig('enable_by_default', 1)
 
-" Set global variable so it can be used by other scripts
+" Use global variable so it can also be used by scripts in autoload
 let g:vim_matchtag_files_default = '*.html,*.xml,*.js,*.jsx,*.ts,*.tsx,*.vue,*.svelte,*.jsp,*.php,*.erb'
 let s:files = s:GetConfig('files', g:vim_matchtag_files_default)
 "}}}
@@ -47,10 +47,12 @@ command MatchTagToggleBoth call matchtag#ToggleBoth()
 augroup matchtag-maping
   autocmd! matchtag-maping
   execute 'autocmd BufNewFile,BufRead '.s:files
-        \.' nnoremap<buffer> '.s:mapping_toggle.' :MatchTagToggle<cr>'
+        \.' nnoremap<buffer> '
+        \.s:mapping_toggle.' :MatchTagToggle<cr>'
 
   execute 'autocmd BufNewFile,BufRead '.s:files
-        \.' nnoremap<buffer> '.s:mapping_both.' :MatchTagToggleBoth<cr>'
+        \.' nnoremap<buffer> '
+        \.s:mapping_both.' :MatchTagToggleBoth<cr>'
 augroup END
 
 " Wil be enabled by default
