@@ -7,6 +7,7 @@ let s:name = 'vim-matchtag'
 let s:match_id = 99
 let s:tagname_regexp = '[0-9A-Za-z_.-]'
 let s:empty_tagname = '\v<(area|base|br|col|embed|hr|input|img|keygen|link|meta|param|source|track|wbr)>'
+let s:component_name = '\v\C^[A-Z]\w+'
 let s:exists_text_changed = exists('##TextChanged')
 
 "}}}
@@ -24,6 +25,8 @@ endfunction
 let s:both = s:GetConfig('both', 0)
 let s:debug = s:GetConfig('debug', 0)
 let s:timeout = s:GetConfig('timeout', 300)
+let s:disable_cache = s:GetConfig('disable_cache',
+      \ s:exists_text_changed)
 "}}}
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -36,7 +39,7 @@ let s:timeout = s:GetConfig('timeout', 300)
 function! matchtag#HighlightMatchingTag()
   " Remove any previous match.
   if exists('w:matchtag_hl_on') && w:matchtag_hl_on
-    silent! call s:DeleteMatch()
+    call s:DeleteMatch()
     let w:matchtag_hl_on = 0
   endif
 
@@ -49,15 +52,33 @@ function! matchtag#HighlightMatchingTag()
   call s:HighlightTag()
 endfunction
 
+function! matchtag#ReportTime()
+  let save_cursor = getcurpos()
+  call s:ResetLineCache()
 
-if s:exists_text_changed
-  " Cache lines when exists TextChanged
+  let total = 0
+  for i in range(1, line('$'))
+    call cursor(i, 1)
+    let start = reltime()
+    call matchtag#HighlightMatchingTag()
+    let end = reltime()
+    let duration = reltime(start, end)
+    echom 'line '.i.', time: '.reltimestr(duration)
+    let total += reltimefloat(duration)
+  endfor
+  let ave = total / line('$')
+
+  call setpos('.', save_cursor)
+  echom 'report Ave: '.string(ave)
+endfunction
+
+let s:cached_lines = {}
+function! s:ResetLineCache()
   let s:cached_lines = {}
+endfunction
 
-  function! s:ResetLineCache()
-    let s:cached_lines = {}
-  endfunction
-
+if !s:disable_cache
+  " Cache lines
   function! s:GetLine(number)
     let number = a:number
     if has_key(s:cached_lines, number)
@@ -91,7 +112,7 @@ function! s:HighlightTag()
     let line = s:GetLine(row)
     let tagname = s:GetTagName(line, col)
     let pos = [[row, col+1, len(tagname)]]
-    call matchtag#Log('On tag '.tagname)
+    call s:Log('On tag '.tagname)
 
     " Set cursor to tag start to search backward correctly
     call cursor(row, col)
@@ -119,16 +140,17 @@ function! s:HighlightTag()
             \len(match_tagname)+1-offset
             \]]
       call matchaddpos('MatchTag', match_pos, 10, s:match_id+1)
-      call matchtag#Log('Matching tag '.match_tagname)
+      call s:Log('Matching tag '.match_tagname)
     else
-      if match(tagname, s:empty_tagname) != -1
+      if match(tagname, s:empty_tagname) != -1 
+            \|| match(tagname, s:component_name) != -1
         " Current tag is emtpy
         call matchaddpos('MatchTag', pos, 10, s:match_id)
-        call matchtag#Log('Current tag is empty')
+        call s:Log('Current tag is empty')
       else
         " Matching tag not found
         call matchaddpos('MatchTagError', pos, 10, s:match_id)
-        call matchtag#Log('Matching tag Not found')
+        call s:Log('Matching tag Not found')
       endif
     endif
     let w:matchtag_hl_on = 1
@@ -183,10 +205,10 @@ let s:open_bracket_forward_regexp = s:NotAfter('</', '?')
 let s:close_bracket_forward_regexp = s:NotBefore('>', '?,-,=')
 
 function! s:GetTagPos(check_nearby_tag)
-  call matchtag#Log('GetTagPos ---------')
+  call s:Log('GetTagPos ---------')
 
   if s:IsInComment()
-    call matchtag#Log('In coment, skip')
+    call s:Log('In coment, skip')
     return [0,0]
   endif
 
@@ -211,14 +233,14 @@ function! s:GetTagPos(check_nearby_tag)
 
   " On tag
   if has_nearby_open && has_nearby_close_forward
-    call matchtag#Log('On tag')
+    call s:Log('On tag')
     return open_bracket
   endif
 
   " Check if in tag
   " Check forward
   if has_nearby_open_forward
-    call matchtag#Log('Move to close tag forward ')
+    call s:Log('Move to close tag forward ')
     return open_bracket_forward
   endif
   " Check backward
@@ -227,22 +249,22 @@ function! s:GetTagPos(check_nearby_tag)
           \ = searchpos('</', 'bcnW', firstline, timeout)
 
     if !s:IsSamePos(open_bracket, open_bracket_of_closetag)
-      call matchtag#Log('Move to open tag backward')
+      call s:Log('Move to open tag backward')
       return open_bracket
     endif
   endif
 
   " Not on/in tag
   if s:IsEmptyPos(open_bracket)
-    call matchtag#Log('Not on/in tag, no open bracket')
+    call s:Log('Not on/in tag, no open bracket')
     return [0,0]
   endif
   if s:IsEmptyPos(close_bracket_forward)
-    call matchtag#Log('Not on/in tag, no close bracket')
+    call s:Log('Not on/in tag, no close bracket')
     return [0,0]
   endif
 
-  call matchtag#Log('Not on/in tag '.has_nearby_open.', '.has_nearby_close_forward)
+  call s:Log('Not on/in tag '.has_nearby_open.', '.has_nearby_close_forward)
   return [0, 0]
 endfunction
 
@@ -282,7 +304,7 @@ function! s:IsInComment()
   let comment = 0
   for id in synstack(line('.'), col('.'))
     let syn = synIDattr(id, 'name')
-    if syn =~ 'comment$'
+    if syn =~ 'string\|comment$'
       let comment = 1
       break
     endif
@@ -309,14 +331,14 @@ function! matchtag#EnableMatchTag()
     autocmd! matchtag
     execute 'autocmd! CursorMoved,CursorMovedI,WinEnter '.files
           \.' call matchtag#HighlightMatchingTag()'
-    execute 'autocmd! Bufleave '.files
+    execute 'autocmd! BufLeave '.files
           \.' call s:DeleteMatch()'
     if s:exists_text_changed
       execute 'autocmd! TextChanged,TextChangedI '.files
             \.' call s:ResetLineCache()'
             \.'|call matchtag#HighlightMatchingTag()'
 
-      execute 'autocmd! Bufleave '.files
+      execute 'autocmd! BufLeave '.files
             \.' call s:ResetLineCache()'
     endif
   augroup END
@@ -326,10 +348,10 @@ endfunction
 
 function! matchtag#Toggle()
   if exists('g:loaded_matchtag') && g:loaded_matchtag
-    call matchtag#Log('Disable')
+    call s:Log('Disable')
     call matchtag#DisableMatchTag()
   else
-    call matchtag#Log('Enable')
+    call s:Log('Enable')
     call matchtag#EnableMatchTag()
   endif
 endfunction
@@ -339,10 +361,15 @@ function! matchtag#ToggleBoth()
   silent! doautocmd CursorMoved
 endfunction
 
-function! matchtag#Log(msg)
+function! s:Log(msg)
   if s:debug
     echom '['.s:name.'] '.a:msg
   endif
 endfunction
+
+function! matchtag#Log(msg)
+  call s:Log(msg)
+endfunction
+
 "}}}
 " vim: fdm=marker
