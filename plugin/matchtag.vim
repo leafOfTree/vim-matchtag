@@ -59,3 +59,4 @@ augroup END
 if s:enable_by_default
   call matchtag#EnableMatchTag()
 endif
+" vim: fdm=marker
