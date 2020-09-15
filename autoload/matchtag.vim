@@ -57,6 +57,8 @@ function! matchtag#ReportTime()
   call s:ResetLineCache()
 
   let total = 0
+  let max = 0
+  let max_line = 0
   for i in range(1, line('$'))
     call cursor(i, 1)
     let start = reltime()
@@ -64,12 +66,18 @@ function! matchtag#ReportTime()
     let end = reltime()
     let duration = reltime(start, end)
     echom 'line '.i.', time: '.reltimestr(duration)
-    let total += reltimefloat(duration)
+    let value = reltimefloat(duration)
+    let total += value
+    if max < value
+      let max = value
+      let max_line = i
+    endif
   endfor
   let ave = total / line('$')
 
   call setpos('.', save_cursor)
   echom 'report Ave: '.string(ave)
+        \.' Max: '.string(max).' on line '.max_line
 endfunction
 
 let s:cached_lines = {}
