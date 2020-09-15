@@ -331,8 +331,10 @@ function! matchtag#EnableMatchTag()
     autocmd! matchtag
     execute 'autocmd! CursorMoved,CursorMovedI,WinEnter '.files
           \.' call matchtag#HighlightMatchingTag()'
-    execute 'autocmd! BufLeave '.files
-          \.' call s:DeleteMatch()'
+
+    " Clear match for all buffers
+    autocmd BufWinEnter * call s:DeleteMatch()
+
     if s:exists_text_changed
       execute 'autocmd! TextChanged,TextChangedI '.files
             \.' call s:ResetLineCache()'
