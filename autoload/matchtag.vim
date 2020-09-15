@@ -52,34 +52,6 @@ function! matchtag#HighlightMatchingTag()
   call s:HighlightTag()
 endfunction
 
-function! matchtag#ReportTime()
-  let save_cursor = getcurpos()
-  call s:ResetLineCache()
-
-  let total = 0
-  let max = 0
-  let max_line = 0
-  for i in range(1, line('$'))
-    call cursor(i, 1)
-    let start = reltime()
-    call matchtag#HighlightMatchingTag()
-    let end = reltime()
-    let duration = reltime(start, end)
-    echom 'line '.i.', time: '.reltimestr(duration)
-    let value = reltimefloat(duration)
-    let total += value
-    if max < value
-      let max = value
-      let max_line = i
-    endif
-  endfor
-  let ave = total / line('$')
-
-  call setpos('.', save_cursor)
-  echom 'report Ave: '.string(ave)
-        \.' Max: '.string(max).' on line '.max_line
-endfunction
-
 let s:cached_lines = {}
 function! s:ResetLineCache()
   let s:cached_lines = {}
@@ -380,6 +352,35 @@ endfunction
 function! matchtag#Log(msg)
   call s:Log(msg)
 endfunction
+
+function! matchtag#ReportTime()
+  let save_cursor = getcurpos()
+  call s:ResetLineCache()
+
+  let total = 0
+  let max = 0
+  let max_line = 0
+  for i in range(1, line('$'))
+    call cursor(i, 1)
+    let start = reltime()
+    call matchtag#HighlightMatchingTag()
+    let end = reltime()
+    let duration = reltime(start, end)
+    echom 'line '.i.', time: '.reltimestr(duration)
+    let value = reltimefloat(duration)
+    let total += value
+    if max < value
+      let max = value
+      let max_line = i
+    endif
+  endfor
+  let ave = total / line('$')
+
+  call setpos('.', save_cursor)
+  echom 'report Ave: '.string(ave)
+        \.' Max: '.string(max).' on line '.max_line
+endfunction
+
 
 "}}}
 " vim: fdm=marker
