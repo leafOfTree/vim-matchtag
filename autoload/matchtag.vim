@@ -225,10 +225,13 @@ function! s:GetTagPos(check_nearby_tag)
   endif
   " Check backward
   if has_nearby_close
-    let open_bracket_of_closetag
+    let open_of_closetag
           \ = searchpos('</', 'bcnW', firstline, timeout)
+    let close_of_closetag
+          \ = searchpos('/\zs>', 'bcnW', firstline, timeout)
 
-    if !s:IsSamePos(open_bracket, open_bracket_of_closetag)
+    if !s:IsSamePos(open_bracket, open_of_closetag)
+          \ && !s:IsSamePos(close_bracket, close_of_closetag) 
       call s:Log('Move to open tag backward')
       return open_bracket
     endif
