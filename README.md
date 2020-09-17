@@ -94,7 +94,7 @@ There are commands you can call directly or add key mapping to.
 
 ## Performance
 
-The highlighting should take about `0.001`~`0.01` depending on the file content. If there is freeze, you can try 
+The highlighting should take about `0.001`~`0.01` depending on the file content. If there is a freeze, you can try 
 
 ```vim
 call matchtag#ReportTime()
