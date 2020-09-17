@@ -92,6 +92,15 @@ There are commands you can call directly or add key mapping to.
 
 - `:MatchTagToggleBoth` Toggle `both` at runtim.
 
+## Performance
+
+The highlighting should take about `0.001`~`0.01` depending on the file content. If there is freeze, you can try 
+
+```vim
+call matchtag#ReportTime()
+```
+and feel free to open an issue.
+
 ## Others
 
 - Jump between matching tags? See `:h matchit`.
