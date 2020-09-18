@@ -57,6 +57,8 @@ augroup END
 
 " Wil be enabled by default
 if s:enable_by_default
-  call matchtag#EnableMatchTag()
+  execute 'autocmd BufNewFile,BufRead '.s:files
+        \.' ++once call matchtag#EnableMatchTag()'
+  " call matchtag#EnableMatchTag()
 endif
 " vim: fdm=marker
