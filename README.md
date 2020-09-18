@@ -48,7 +48,7 @@ let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.vue,*.svelte,*.jsp'
 
 | variable                           | description                                                | default   |
 |------------------------------------|------------------------------------------------------------|-----------|
-| `g:vim_matchtag_enable_by_default` | Enable by default.                                         | 1         |
+| `g:vim_matchtag_enable_by_default` | Enable by default. You can always toggle it.               | 1         |
 | `g:vim_matchtag_files`             | Enable on these files.                                     | *See ^*   |
 | `g:vim_matchtag_both`              | Highight both the current tag and the matching tag. <br>`0` means the current tag won't be highighted <br>if the cursor is on its tagname.| 0         |
 | `g:vim_matchtag_mapping_toggle`    | Key mapping to toggle highlighting.                        | `'<c-t>'` |
