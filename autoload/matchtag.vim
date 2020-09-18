@@ -26,7 +26,7 @@ let s:both = s:GetConfig('both', 0)
 let s:debug = s:GetConfig('debug', 0)
 let s:timeout = s:GetConfig('timeout', 300)
 let s:disable_cache = s:GetConfig('disable_cache',
-      \ s:exists_text_changed)
+      \ !s:exists_text_changed)
 "}}}
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
