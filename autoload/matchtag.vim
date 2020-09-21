@@ -27,6 +27,10 @@ let s:debug = s:GetConfig('debug', 0)
 let s:timeout = s:GetConfig('timeout', 300)
 let s:disable_cache = s:GetConfig('disable_cache',
       \ !s:exists_text_changed)
+let s:skip = s:GetConfig('skip', 
+      \ '^javascript\|script$\|style$')
+let s:skip_except = s:GetConfig('skip_except', 
+      \ 'html\|template')
 "}}}
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -46,6 +50,12 @@ function! matchtag#HighlightMatchingTag()
   " Avoid removing the popup menu.
   " Or return when there are no colors
   if pumvisible() || (&t_Co < 8 && !has('gui_running'))
+    return 
+  endif
+
+  " Skip if current position contains specific syntax
+  if s:IsInSkipSyntax()
+    call s:Log('Skip syntax')
     return 
   endif
 
@@ -284,15 +294,35 @@ function! s:SearchMatchTag(tagname)
 endfunction
 
 function! s:IsInComment()
-  let comment = 0
-  for id in synstack(line('.'), col('.'))
-    let syn = synIDattr(id, 'name')
-    if syn =~ 'string\|comment$'
-      let comment = 1
+  let names = s:SynNames()
+  return s:containSyntax(names, 'string\|comment$')
+endfunction
+
+function! s:IsInSkipSyntax()
+  let names = s:SynNames()
+  return s:containSyntax(names, s:skip)
+        \ && !s:containSyntax(names, s:skip_except)
+endfunction
+
+function! s:SynNames()
+  let ids = synstack(line('.'), col('.'))
+  let names = map(ids, { _, id -> synIDattr(id, 'name') })
+  return names
+endfunction
+
+function! s:containSyntax(names, pat)
+  if empty(a:pat)
+    return 0
+  endif
+
+  let contain = 0
+  for syn in a:names
+    if syn =~ a:pat
+      let contain = 1
       break
     endif
   endfor
-  return comment
+  return contain
 endfunction
 
 function! s:DeleteMatch()
