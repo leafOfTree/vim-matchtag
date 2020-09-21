@@ -53,6 +53,9 @@ let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.vue,*.svelte,*.jsp'
 | `g:vim_matchtag_both`              | Highight both the current tag and the matching tag. <br>`0` means the current tag won't be highighted <br>if the cursor is on its tagname.| 0         |
 | `g:vim_matchtag_mapping_toggle`    | Key mapping to toggle highlighting.                        | `'<c-t>'` |
 | `g:vim_matchtag_mapping_both`      | Key mapping to toggle `both` at runtim.                    | `'<c-b>'` |
+| `g:vim_matchtag_skip`              | Syntax to skip.                                            | `'^javascript\|script$\|style$'`              |
+| `g:vim_matchtag_skip_except`       | Syntax not to skip.                                        |  `'html\|template'`|
+
 | `g:vim_matchtag_timeout`           | The search stops after timeout milliseconds.               | 300       |
 | `g:vim_matchtag_disable_cache`     | Disable the cache for lines. <br>(By default the lines will be cached until any text is changed)                                  | 0         |
 | `g:vim_matchtag_debug`             | Echo debug messages.                                       | 0         |
@@ -98,9 +101,17 @@ There are commands you can call directly or add key mapping to.
 The highlighting should take about `0.001`~`0.01` depending on the file content. If there is a freeze, you can try 
 
 ```vim
+let g:vim_matchtag_skip = '...'         "Syntax to skip
+let g:vim_matchtag_skip_except = '...'  "Syntax not to skip
+
 call matchtag#ReportTime()
 ```
 and feel free to open an issue.
+
+You can show the syntax stack under the cursor by running
+```vim
+echo map(synstack(line('.'), col('.')), { _, id -> synIDattr(id, 'name') })
+```
 
 ## Others
 
