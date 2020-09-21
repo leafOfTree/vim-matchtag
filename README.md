@@ -56,7 +56,7 @@ let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.vue,*.svelte,*.jsp'
 | `g:vim_matchtag_skip`              | Syntax to skip.                                            | *See +*   |
 | `g:vim_matchtag_skip_except`       | Syntax not to skip.                                        | *See +*   |
 | `g:vim_matchtag_timeout`           | The search stops after timeout milliseconds.               | 300       |
-| `g:vim_matchtag_disable_cache`     | Disable the cache for lines. <br>(By default the lines will be cached until any text is changed)                                  | 0         |
+| `g:vim_matchtag_disable_cache`     | Disable the cache for lines. <br>(By default the lines are cached until text changed)                                  | 0         |
 | `g:vim_matchtag_debug`             | Echo debug messages.                                       | 0         |
 
 **Note**
