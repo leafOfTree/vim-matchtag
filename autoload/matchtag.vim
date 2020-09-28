@@ -295,7 +295,7 @@ endfunction
 
 function! s:IsInComment()
   let names = s:SynNames()
-  return s:containSyntax(names, 'string\|comment$')
+  return s:containSyntax(names, 'comment$')
 endfunction
 
 function! s:IsInSkipSyntax()
