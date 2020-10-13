@@ -283,14 +283,12 @@ function! s:SearchMatchTag(tagname)
 
     " Don't include '<' if search backward
     let offset = 1
-    let stopline = line('w0')
   else
     let start = '<'.tagname
     let end = '/'.tagname
     let offset = 0
-    let stopline = line('w$')
   endif
-  let [row, col] = searchpairpos(start, '', end, flags, function('s:IsInComment'), stopline, s:timeout)
+  let [row, col] = searchpairpos(start, '', end, flags, function('s:IsInComment'), 0, s:timeout)
 
   return [row, col, offset]
 endfunction
