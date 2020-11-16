@@ -300,20 +300,48 @@ endfunction
 
 function! s:IsInSkipSyntax()
   let names = s:SynNames()
-  return s:containSyntax(names, s:skip)
-        \ && !s:containSyntax(names, s:skip_except)
+  return empty(names) 
+        \ || (s:containSyntax(names, s:skip)
+        \ && !s:containSyntax(names, s:skip_except))
 endfunction
 
 function! s:SynNames()
-  let ids = synstack(line('.'), col('.'))
+  let lnum = line('.')
+  let cnum = col('.')
+  let ids = synstack(lnum, cnum)
   let names = map(ids, { _, id -> synIDattr(id, 'name') })
+
+  if empty(names)
+    let names = s:NearSynNames(lnum)
+  endif
+  return names
+endfunction
+
+function! s:NearSynNames(lnum)
+  let lnum = a:lnum
+  let cnum = col('$')
+  let names = []
+  if empty(names)
+    " Try next line if empty
+    let nextlnum = nextnonblank(lnum)
+    let nextcnum = cnum
+    let ids = synstack(nextlnum, nextcnum)
+    let names = map(ids, { _, id -> synIDattr(id, 'name') })
+  endif
+  if empty(names)
+    " Try prev line if empty
+    let prevlnum = prevnonblank(lnum)
+    let prevcnum = cnum
+    let ids = synstack(prevlnum, prevcnum)
+    let names = map(ids, { _, id -> synIDattr(id, 'name') })
+  endif
   return names
 endfunction
 
 function! s:containSyntax(names, pat)
   if empty(a:pat)
     return 0
-  endif
+  endif 
 
   let contain = 0
   for syn in a:names
