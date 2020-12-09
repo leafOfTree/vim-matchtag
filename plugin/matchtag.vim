@@ -26,8 +26,8 @@ function! s:GetConfig(name, default)
   return exists(name) ? eval(name) : a:default
 endfunction
 
-let s:mapping_toggle = s:GetConfig('mapping_toggle', '<c-t>')
-let s:mapping_both = s:GetConfig('mapping_both', '<c-b>')
+let s:mapping_toggle = s:GetConfig('mapping_toggle', '')
+let s:mapping_both = s:GetConfig('mapping_both', '')
 let s:enable_by_default = s:GetConfig('enable_by_default', 1)
 
 " Use global variable so it can also be used by scripts in autoload
@@ -46,13 +46,16 @@ command MatchTagToggleBoth call matchtag#ToggleBoth()
 " Mapping
 augroup matchtag-maping
   autocmd! matchtag-maping
-  execute 'autocmd BufNewFile,BufRead '.s:files
-        \.' nnoremap<buffer> '
-        \.s:mapping_toggle.' :MatchTagToggle<cr>'
-
-  execute 'autocmd BufNewFile,BufRead '.s:files
-        \.' nnoremap<buffer> '
-        \.s:mapping_both.' :MatchTagToggleBoth<cr>'
+  if !empty(s:mapping_toggle)
+    execute 'autocmd BufNewFile,BufRead '.s:files
+          \.' nnoremap<buffer> '
+          \.s:mapping_toggle.' :MatchTagToggle<cr>'
+  endif
+  if !empty(s:mapping_both)
+    execute 'autocmd BufNewFile,BufRead '.s:files
+          \.' nnoremap<buffer> '
+          \.s:mapping_both.' :MatchTagToggleBoth<cr>'
+  endif
 augroup END
 
 " Wil be enabled by default
