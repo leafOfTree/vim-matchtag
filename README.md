@@ -108,8 +108,8 @@ There are commands you can call directly or add key mapping to.
 The highlighting should take about `0.001`~`0.01` depending on the file content. If there is a freeze, you can try 
 
 ```vim
-let g:vim_matchtag_skip = '...'         "Syntax to skip
-let g:vim_matchtag_skip_except = '...'  "Syntax not to skip
+let g:vim_matchtag_skip = '<pattern>'         " Syntax to skip
+let g:vim_matchtag_skip_except = '<pattern>'  " Syntax not to skip
 
 call matchtag#ReportTime()
 ```
