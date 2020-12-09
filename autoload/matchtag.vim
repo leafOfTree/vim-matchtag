@@ -300,9 +300,11 @@ endfunction
 
 function! s:IsInSkipSyntax()
   let names = s:SynNames()
-  return empty(names) 
-        \ || (s:containSyntax(names, s:skip)
-        \ && !s:containSyntax(names, s:skip_except))
+  if empty(names)
+    return 1
+  else
+    return s:containSyntax(names, s:skip) && !s:containSyntax(names, s:skip_except)
+  endif
 endfunction
 
 function! s:SynNames()
