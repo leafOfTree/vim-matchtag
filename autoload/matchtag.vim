@@ -24,11 +24,11 @@ endfunction
 
 let s:both = s:GetConfig('both', 0)
 let s:debug = s:GetConfig('debug', 0)
-let s:timeout = s:GetConfig('timeout', 300)
+let s:timeout = s:GetConfig('timeout', 50)
 let s:disable_cache = s:GetConfig('disable_cache',
       \ !s:exists_text_changed)
 let s:skip = s:GetConfig('skip', 
-      \ '^javascript\|style$')
+      \ 'javascript\|css\|script\|style')
 let s:skip_except = s:GetConfig('skip_except', 
       \ 'html\|template')
 "}}}

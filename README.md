@@ -55,7 +55,7 @@ let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.vue,*.svelte,*.jsp'
 | `g:vim_matchtag_mapping_both`      | Key mapping to toggle `both` at runtim.                    | `''` |
 | `g:vim_matchtag_skip`              | Syntax to skip.                                            | *See +*   |
 | `g:vim_matchtag_skip_except`       | Syntax not to skip.                                        | *See +*   |
-| `g:vim_matchtag_timeout`           | The search stops after timeout milliseconds.               | 300       |
+| `g:vim_matchtag_timeout`           | The search stops after timeout milliseconds.               | 50       |
 | `g:vim_matchtag_disable_cache`     | Disable the cache for lines. <br>(By default the lines are cached until text changed)                                  | 0         |
 | `g:vim_matchtag_debug`             | Echo debug messages.                                       | 0         |
 
@@ -72,7 +72,7 @@ let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.vue,*.svelte,*.jsp'
 - +: Both are patterns(`:h pattern`). The default values are
 
     ```vim
-    let g:vim_matchtag_skip = '^javascript\|style$'
+    let g:vim_matchtag_skip = 'javascript\|css\|script\|style'
     let g:vim_matchtag_skip_except = 'html\|template'
     ```
 - See [performance](#performance) if there are lags.
