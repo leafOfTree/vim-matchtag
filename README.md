@@ -101,7 +101,7 @@ There are commands you can call directly or add key mapping to.
 
 - `:MatchTagToggle` Toggle highlighting.
 
-- `:MatchTagToggleBoth` Toggle `both` at runtim.
+- `:MatchTagToggleBoth` Toggle `g:vim_matchtag_both` at runtime.
 
 ## Performance
 
