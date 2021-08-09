@@ -50,11 +50,14 @@ let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.vue,*.svelte,*.jsp'
 
 | variable                           | description                                                | default   |
 |------------------------------------|------------------------------------------------------------|-----------|
-| `g:vim_matchtag_enable_by_default` | Enable by default. You can always toggle it.               | 1         |
 | `g:vim_matchtag_files`             | Enable on these files.                                     | *See ^*   |
-| `g:vim_matchtag_both`              | Highight both the current tag and the matching tag. <br>`0` means the current tag won't be highighted <br>if the cursor is on its tagname.| 0         |
-| `g:vim_matchtag_mapping_toggle`    | Key mapping to toggle highlighting.                        | `''` |
-| `g:vim_matchtag_mapping_both`      | Key mapping to toggle `both` at runtim.                    | `''` |
+| `g:vim_matchtag_enable_by_default` | Enable by default. It can be toggled.                      | 1         |
+| `g:vim_matchtag_both`              | Highight both the current and matching tag. <br>`0` means the current tag won't be highighted <br>when the cursor is on its tagname. It can be toggled. | 0         |
+
+Performance/debug related
+
+| variable                           | description                                                | default   |
+|------------------------------------|------------------------------------------------------------|-----------|
 | `g:vim_matchtag_skip`              | Syntax to skip.                                            | *See +*   |
 | `g:vim_matchtag_skip_except`       | Syntax not to skip.                                        | *See +*   |
 | `g:vim_matchtag_timeout`           | The search stops after timeout milliseconds.               | 50       |
@@ -69,7 +72,7 @@ let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.vue,*.svelte,*.jsp'
     let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.ts,*.tsx,*.vue,*.svelte,*.jsp,*.php,*.erb'
     ```
 
-- If you prefer to enable it on demand, you can set `g:vim_matchtag_enable_by_default` to `0` then toggle it manualy.
+- If you prefer to enable it on demand, you can set `g:vim_matchtag_enable_by_default` to `0` then toggle it by `:MatchTagToggle`.
 
 - +: Both are patterns(`:h pattern`). The default values are
 
