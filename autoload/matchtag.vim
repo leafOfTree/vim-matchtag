@@ -301,9 +301,13 @@ endfunction
 function! s:IsInSkipSyntax()
   let names = s:SynNames()
   if empty(names)
-    return 1
+    " Skip empty syntax if neither html nor xml
+    if &filetype != 'html' && &filetype != 'xml'
+      return 1
+    endif
   else
-    return s:containSyntax(names, s:skip) && !s:containSyntax(names, s:skip_except)
+    return s:containSyntax(names, s:skip)
+          \&& !s:containSyntax(names, s:skip_except)
   endif
 endfunction
 
@@ -345,14 +349,11 @@ function! s:containSyntax(names, pat)
     return 0
   endif 
 
-  let contain = 0
   for syn in a:names
     if syn =~ a:pat
-      let contain = 1
-      break
+      return 1
     endif
   endfor
-  return contain
 endfunction
 
 function! s:DeleteMatch()
