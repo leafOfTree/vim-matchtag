@@ -53,18 +53,9 @@ let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.vue,*.svelte,*.jsp'
 | `g:vim_matchtag_files`               | Enable on these files.                              | *See ^* |
 | `g:vim_matchtag_enable_by_default`   | Enable by default.                                  | 1       |
 | `g:vim_matchtag_highlight_cursor_on` | Highlight the current tag when the cursor is on it. | 0       |
-
-Mappings which will only be set for enabled files.
-
-| variable                                            | description                                             | default |
-|-----------------------------------------------------|---------------------------------------------------------|---------|
+|Mappings / Performance / debug related|||
 | `g:vim_matchtag_mapping_toggle`                     | Key mapping to toggle highlighting.                     | `''`    |
 | `g:vim_matchtag_mapping_toggle_highlight_cursor_on` | Key mapping to toggle `highlight_cursor_on` at runtime. | `''`    |
-
-Performance/debug related
-
-| variable                       | description                                                                           | default |
-|--------------------------------|---------------------------------------------------------------------------------------|---------|
 | `g:vim_matchtag_skip`          | Syntax to skip.                                                                       | *See +* |
 | `g:vim_matchtag_skip_except`   | Syntax not to skip.                                                                   | *See +* |
 | `g:vim_matchtag_timeout`       | The search stops after timeout milliseconds.                                          | 50      |
