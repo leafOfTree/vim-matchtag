@@ -66,12 +66,12 @@ let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.vue,*.svelte,*.jsp'
 
 - If you prefer to enable it on demand, you can set `g:vim_matchtag_enable_by_default` to `0` then toggle it by `:MatchTagToggle`.
 
-- ^: It is a comma separated file pattern(`:h autocmd-patterns`). It defaults to
+- ^: It is a comma separated file pattern (`:h autocmd-patterns`). It defaults to
 
     ```vim
     let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.ts,*.tsx,*.vue,*.svelte,*.jsp,*.php,*.erb'
     ```
-- +: Both are patterns(`:h pattern`). The default values are
+- +: Both are patterns (`:h pattern`). The default values are
 
     ```vim
     let g:vim_matchtag_skip = 'javascript\|css\|script\|style'
