@@ -22,7 +22,7 @@ function! s:GetConfig(name, default)
   return exists(name) ? eval(name) : a:default
 endfunction
 
-let s:both = s:GetConfig('both', 0)
+let s:highlight_cursor_on = s:GetConfig('both', s:GetConfig('highlight_cursor_on', 0))
 let s:debug = s:GetConfig('debug', 0)
 let s:timeout = s:GetConfig('timeout', 50)
 let s:disable_cache = s:GetConfig('disable_cache',
@@ -120,7 +120,7 @@ function! s:HighlightTag()
       let cursor_on_tag = cursor_row == row
             \ && cursor_col >= col 
             \ && cursor_col <= (col+len(tagname)+1)
-      if !cursor_on_tag || s:both
+      if !cursor_on_tag || s:highlight_cursor_on
         call matchaddpos('MatchTag', pos, 10, s:match_id)
       endif
       " Matching tag
@@ -401,8 +401,8 @@ function! matchtag#Toggle()
   endif
 endfunction
 
-function! matchtag#ToggleBoth()
-  let s:both = 1 - s:both
+function! matchtag#ToggleHighlightCursorOn()
+  let s:highlight_cursor_on = 1 - s:highlight_cursor_on
   silent! doautocmd CursorMoved
 endfunction
 

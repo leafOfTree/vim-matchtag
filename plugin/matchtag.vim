@@ -27,7 +27,8 @@ function! s:GetConfig(name, default)
 endfunction
 
 let s:mapping_toggle = s:GetConfig('mapping_toggle', '')
-let s:mapping_both = s:GetConfig('mapping_both', '')
+let s:mapping_toggle_highlight_cursor_on = s:GetConfig('mapping_both',
+      \s:GetConfig('mapping_toggle_highlight_cursor_on', ''))
 let s:enable_by_default = s:GetConfig('enable_by_default', 1)
 
 " Use global variable so it can also be used by scripts in autoload
@@ -41,7 +42,8 @@ highlight default link matchTagError Error
 
 " Command
 command MatchTagToggle call matchtag#Toggle()
-command MatchTagToggleBoth call matchtag#ToggleBoth()
+command MatchTagToggleHighlightCursorOn call matchtag#ToggleHighlightCursorOn()
+command MatchTagToggleBoth call matchtag#ToggleHighlightCursorOn()
 
 " Mapping
 augroup matchtag-maping
@@ -51,17 +53,16 @@ augroup matchtag-maping
           \.' nnoremap<buffer> '
           \.s:mapping_toggle.' :MatchTagToggle<cr>'
   endif
-  if !empty(s:mapping_both)
+  if !empty(s:mapping_toggle_highlight_cursor_on)
     execute 'autocmd BufNewFile,BufRead '.s:files
           \.' nnoremap<buffer> '
-          \.s:mapping_both.' :MatchTagToggleBoth<cr>'
+          \.s:mapping_toggle_highlight_cursor_on.' :MatchTagToggleHighlightCursorOn<cr>'
   endif
 augroup END
 
-" Wil be enabled by default
+" Enable by default for specific files
 if s:enable_by_default
   execute 'autocmd BufNewFile,BufRead '.s:files
         \.' ++once call matchtag#EnableMatchTag()'
-  " call matchtag#EnableMatchTag()
 endif
 " vim: fdm=marker

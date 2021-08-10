@@ -48,32 +48,38 @@ let g:vim_matchtag_enable_by_default = 0
 let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.vue,*.svelte,*.jsp'
 ```
 
-| variable                           | description                                                | default   |
-|------------------------------------|------------------------------------------------------------|-----------|
-| `g:vim_matchtag_files`             | Enable on these files.                                     | *See ^*   |
-| `g:vim_matchtag_enable_by_default` | Enable by default. It can be toggled.                      | 1         |
-| `g:vim_matchtag_both`              | Highight both the current and matching tag. <br>`0` means the current tag won't be highighted <br>when the cursor is on its tagname. It can be toggled. | 0         |
+| variable                             | description                                         | default |
+|--------------------------------------|-----------------------------------------------------|---------|
+| `g:vim_matchtag_files`               | Enable on these files.                              | *See ^* |
+| `g:vim_matchtag_enable_by_default`   | Enable by default.                                  | 1       |
+| `g:vim_matchtag_highlight_cursor_on` | Highlight the current tag when the cursor is on it. | 0       |
+
+Mappings which will only be set for enabled files.
+
+| variable                                            | description                                             | default |
+|-----------------------------------------------------|---------------------------------------------------------|---------|
+| `g:vim_matchtag_mapping_toggle`                     | Key mapping to toggle highlighting.                     | `''`    |
+| `g:vim_matchtag_mapping_toggle_highlight_cursor_on` | Key mapping to toggle `highlight_cursor_on` at runtime. | `''`    |
 
 Performance/debug related
 
-| variable                           | description                                                | default   |
-|------------------------------------|------------------------------------------------------------|-----------|
-| `g:vim_matchtag_skip`              | Syntax to skip.                                            | *See +*   |
-| `g:vim_matchtag_skip_except`       | Syntax not to skip.                                        | *See +*   |
-| `g:vim_matchtag_timeout`           | The search stops after timeout milliseconds.               | 50       |
-| `g:vim_matchtag_disable_cache`     | Disable the cache for lines. <br>(By default the lines are cached until text changed)                                  | 0         |
-| `g:vim_matchtag_debug`             | Echo debug messages.                                       | 0         |
+| variable                       | description                                                                           | default |
+|--------------------------------|---------------------------------------------------------------------------------------|---------|
+| `g:vim_matchtag_skip`          | Syntax to skip.                                                                       | *See +* |
+| `g:vim_matchtag_skip_except`   | Syntax not to skip.                                                                   | *See +* |
+| `g:vim_matchtag_timeout`       | The search stops after timeout milliseconds.                                          | 50      |
+| `g:vim_matchtag_disable_cache` | Disable the cache for lines. <br>(By default the lines are cached until text changed) | 0       |
+| `g:vim_matchtag_debug`         | Echo debug messages.                                                                  | 0       |
 
 **Note**
+
+- If you prefer to enable it on demand, you can set `g:vim_matchtag_enable_by_default` to `0` then toggle it by `:MatchTagToggle`.
 
 - ^: It is a comma separated file pattern(`:h autocmd-patterns`). It defaults to
 
     ```vim
     let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.ts,*.tsx,*.vue,*.svelte,*.jsp,*.php,*.erb'
     ```
-
-- If you prefer to enable it on demand, you can set `g:vim_matchtag_enable_by_default` to `0` then toggle it by `:MatchTagToggle`.
-
 - +: Both are patterns(`:h pattern`). The default values are
 
     ```vim
@@ -84,29 +90,27 @@ Performance/debug related
 
 ### Highlighting
 
-You could change `matchTag` highlighting as follows. The default is `IncSearch`.
+When the matching tag is found, the highlight group is `matchTag` (Default `IncSearch`). Otherwise, it's `matchTagError` (Default `Error`).
+
+You could change them as follows.
 
 ```vim
 highlight link matchTag Search
 highlight link matchTag MatchParen
-
-" Or
 highlight matchTag gui=reverse
-```
 
-If the matching tag is not found, the current tag will be highlighted as `matchTagError`, which defaults to `Error`.
-
-```vim
 highlight link matchTagError Todo
 ```
 
-### Command
+If these don't take effect, try putting them at the end of your vimrc.
+
+### Commands
 
 There are commands you can call directly or add key mapping to.
 
 - `:MatchTagToggle` Toggle highlighting.
 
-- `:MatchTagToggleBoth` Toggle `g:vim_matchtag_both` at runtime.
+- `:MatchTagToggleHighlightCursorOn` Toggle `g:vim_matchtag_highlight_cursor_on` at runtime.
 
 ## Performance
 
