@@ -27,8 +27,8 @@ function! s:GetConfig(name, default)
 endfunction
 
 let s:mapping_toggle = s:GetConfig('mapping_toggle', '')
-let s:mapping_toggle_highlight_cursor_on = s:GetConfig('mapping_both',
-      \s:GetConfig('mapping_toggle_highlight_cursor_on', ''))
+let s:mapping_toggle_highlight_cursor_on = s:GetConfig('mapping_toggle_highlight_cursor_on',
+      \s:GetConfig('mapping_both', ''))
 let s:enable_by_default = s:GetConfig('enable_by_default', 1)
 
 " Use global variable so it can also be used by scripts in autoload

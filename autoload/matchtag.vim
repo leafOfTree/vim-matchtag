@@ -22,7 +22,7 @@ function! s:GetConfig(name, default)
   return exists(name) ? eval(name) : a:default
 endfunction
 
-let s:highlight_cursor_on = s:GetConfig('both', s:GetConfig('highlight_cursor_on', 0))
+let s:highlight_cursor_on = s:GetConfig('highlight_cursor_on', s:GetConfig('both', 0))
 let s:debug = s:GetConfig('debug', 0)
 let s:timeout = s:GetConfig('timeout', 50)
 let s:disable_cache = s:GetConfig('disable_cache',
