@@ -4,7 +4,7 @@
 "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 let s:name = 'vim-matchtag'
-let s:match_id = 99
+let s:match_id = 999
 let s:tagname_regexp = '[0-9A-Za-z_.-]'
 let s:empty_tagname = '\v<(area|base|br|col|embed|hr|input|img|keygen|link|meta|param|source|track|wbr)>'
 let s:component_name = '\v\C^[A-Z]\w+'
