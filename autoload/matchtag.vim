@@ -301,10 +301,8 @@ endfunction
 function! s:IsInSkipSyntax()
   let names = s:SynNames()
   if empty(names)
-    " Skip empty syntax if neither html nor xml
-    if &filetype != 'html' && &filetype != 'xml'
-      return 1
-    endif
+    " Don't skip empty syntax to support treesitter
+    return 0
   else
     return s:containSyntax(names, s:skip)
           \&& !s:containSyntax(names, s:skip_except)
