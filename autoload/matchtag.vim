@@ -96,7 +96,7 @@ function! s:HighlightTag()
     endif
   endif
 
-  let [row, col] = s:GetTagPos(1)
+  let [row, col] = s:GetTagPos()
   if row
     " Find current tag
     let line = s:GetLine(row)
@@ -107,9 +107,8 @@ function! s:HighlightTag()
     " Set cursor to tag start to search backward correctly
     call cursor(row, col)
 
-    " Find matching tag
     let [match_row, match_col, offset] = s:SearchMatchTag(tagname)
-    if match_row
+    if match_row " Find matching tag
       let match_line = match_row == row 
             \ ? line 
             \ : s:GetLine(match_row)
@@ -131,12 +130,11 @@ function! s:HighlightTag()
             \]]
       call matchaddpos('MatchTag', match_pos, 10, s:match_id+1)
       call s:Log('Matching tag '.match_tagname)
-    else
-      if match(tagname, s:empty_tagname) != -1 
-            \|| match(tagname, s:component_name) != -1
+    else " No matching tag found
+      if s:IsEmptyTag(tagname)
         " Current tag is emtpy
         call matchaddpos('MatchTag', pos, 10, s:match_id)
-        call s:Log('Current tag is empty')
+        call s:Log('Current tag is empty: '.tagname)
       else
         " Matching tag not found
         call matchaddpos('MatchTagError', pos, 10, s:match_id)
@@ -147,6 +145,11 @@ function! s:HighlightTag()
   endif
 
   call setpos('.', save_cursor)
+endfunction
+
+function! s:IsEmptyTag(tagname)
+  return match(a:tagname, s:empty_tagname) != -1 
+        \|| match(a:tagname, s:component_name) != -1
 endfunction
 
 " Compare two positions
@@ -194,12 +197,12 @@ let s:close_bracket_regexp = s:NotBefore('>', '?,=')
 let s:open_bracket_forward_regexp = s:NotAfter('</', '?')
 let s:close_bracket_forward_regexp = s:NotBefore('>', '?,-,=')
 
-function! s:GetTagPos(check_nearby_tag)
-  call s:Log('GetTagPos ---------')
+function! s:GetTagPos()
+  call s:Log('GetTagPos')
 
   if s:IsInComment()
     call s:Log('In coment, skip')
-    return [0,0]
+    return [0, 0]
   endif
 
   let timeout = s:timeout
@@ -230,7 +233,7 @@ function! s:GetTagPos(check_nearby_tag)
   " Check if in tag
   " Check forward
   if has_nearby_open_forward
-    call s:Log('Move to close tag forward ')
+    call s:Log('Find close tag forward ')
     return open_bracket_forward
   endif
   " Check backward
@@ -242,7 +245,15 @@ function! s:GetTagPos(check_nearby_tag)
 
     if !s:IsSamePos(open_bracket, open_of_closetag)
           \ && !s:IsSamePos(close_bracket, close_of_closetag) 
-      call s:Log('Move to open tag backward')
+
+      let line = s:GetLine(open_bracket[0])
+      let tagname = s:GetTagName(line, open_bracket[1])
+      if s:IsEmptyTag(tagname)
+        call s:Log('After an empty tag')
+        return [0, 0]
+      endif
+
+      call s:Log('Find open tag backward')
       return open_bracket
     endif
   endif
@@ -250,11 +261,11 @@ function! s:GetTagPos(check_nearby_tag)
   " Not on/in tag
   if s:IsEmptyPos(open_bracket)
     call s:Log('Not on/in tag, no open bracket')
-    return [0,0]
+    return [0, 0]
   endif
   if s:IsEmptyPos(close_bracket_forward)
     call s:Log('Not on/in tag, no close bracket')
-    return [0,0]
+    return [0, 0]
   endif
 
   call s:Log('Not on/in tag '.has_nearby_open.', '.has_nearby_close_forward)
