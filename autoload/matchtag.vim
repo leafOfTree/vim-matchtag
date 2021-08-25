@@ -213,31 +213,33 @@ function! s:GetTagPos()
   let open_bracket = searchpos(s:open_bracket_regexp, 'cbnW', firstline, timeout)
   " Search for '>' backward
   let close_bracket = searchpos(s:close_bracket_regexp, 'bnW', firstline, timeout)
-  let has_nearby_open = s:IsAheadOf(close_bracket, open_bracket)
-  let has_nearby_close = !has_nearby_open
+
+  let near_open = s:IsAheadOf(close_bracket, open_bracket)
+  let near_close = !near_open
 
   " Search for '<' forward
   let open_bracket_forward = searchpos(s:open_bracket_forward_regexp, 'nW', lastline, timeout)
   " Search for '>' forward
   let close_bracket_forward = searchpos(s:close_bracket_forward_regexp, 'cnW', lastline, timeout)
-  let has_nearby_close_forward = s:IsAheadOf(close_bracket_forward, open_bracket_forward)
+
+  let near_close_forward = s:IsAheadOf(close_bracket_forward, open_bracket_forward)
         \ || s:IsEmptyPos(open_bracket_forward)
-  let has_nearby_open_forward = !has_nearby_close_forward
+  let near_open_forward = !near_close_forward
 
   " On tag
-  if has_nearby_open && has_nearby_close_forward
+  if near_open && near_close_forward
     call s:Log('On tag')
     return open_bracket
   endif
 
   " Check if in tag
   " Check forward
-  if has_nearby_open_forward
+  if near_open_forward
     call s:Log('Find close tag forward ')
     return open_bracket_forward
   endif
   " Check backward
-  if has_nearby_close
+  if near_close
     let open_of_closetag
           \ = searchpos('</', 'bcnW', firstline, timeout)
     let close_of_closetag
@@ -268,7 +270,7 @@ function! s:GetTagPos()
     return [0, 0]
   endif
 
-  call s:Log('Not on/in tag '.has_nearby_open.', '.has_nearby_close_forward)
+  call s:Log('Not on/in tag, <: '.near_open.', >: '.near_close_forward)
   return [0, 0]
 endfunction
 
