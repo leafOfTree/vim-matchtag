@@ -301,14 +301,19 @@ function! s:SearchMatchTag(tagname)
     let end = '/'.tagname
     let offset = 0
   endif
-  let [row, col] = searchpairpos(start, '', end, flags, function('s:IsInComment'), 0, s:timeout)
+  let [row, col] = searchpairpos(start, '', end, flags, function('s:IsInCommentOrString'), 0, s:timeout)
 
   return [row, col, offset]
 endfunction
 
+function! s:IsInCommentOrString()
+  let names = s:SynNames()
+  return s:containSyntax(names, '\ccomment\|string$')
+endfunction
+
 function! s:IsInComment()
   let names = s:SynNames()
-  return s:containSyntax(names, 'comment$')
+  return s:containSyntax(names, '\ccomment$')
 endfunction
 
 function! s:IsInSkipSyntax()
