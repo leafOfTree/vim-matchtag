@@ -357,7 +357,13 @@ function! s:NearSynNames(lnum)
     let ids = synstack(prevlnum, prevcnum)
     let names = map(ids, { _, id -> synIDattr(id, 'name') })
   endif
-  return names
+
+  " Not sure why names become 0 when opening empty file
+  if empty(names)
+    return []
+  else
+    return names
+  endif
 endfunction
 
 function! s:containSyntax(names, pat)
