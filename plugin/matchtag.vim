@@ -41,9 +41,9 @@ highlight default link matchTag	Visual
 highlight default link matchTagError Error
 
 " Command
-command MatchTagToggle call matchtag#Toggle()
-command MatchTagToggleHighlightCursorOn call matchtag#ToggleHighlightCursorOn()
-command MatchTagToggleBoth call matchtag#ToggleHighlightCursorOn()
+command! MatchTagToggle call matchtag#Toggle()
+command! MatchTagToggleHighlightCursorOn call matchtag#ToggleHighlightCursorOn()
+command! MatchTagToggleBoth call matchtag#ToggleHighlightCursorOn()
 
 " Mapping
 augroup matchtag-maping
