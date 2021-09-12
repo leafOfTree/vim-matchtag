@@ -52,7 +52,7 @@ let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.vue,*.svelte,*.jsp'
 |--------------------------------------|-----------------------------------------------------|---------|
 | g:vim_matchtag_files               | Enable on these files.                              | *See ^* |
 | g:vim_matchtag_enable_by_default   | Enable by default.                                  | 1       |
-| g:vim_matchtag_highlight_cursor_on | Highlight the current tag when the cursor is on it. | 0       |
+| g:vim_matchtag_highlight_cursor_on | Highlight the tag when the cursor is on it. | 0       |
 | **Mappings / Performance / debug related** |||
 | g:vim_matchtag_mapping_toggle                     | Key mapping to toggle highlighting.                     | `''`    |
 | g:vim_matchtag_mapping_toggle_highlight_cursor_on | Key mapping to toggle `highlight_cursor_on`. | `''`    |
@@ -101,7 +101,7 @@ There are commands you can call directly or add key mapping to.
 
 - `:MatchTagToggle` Toggle highlighting.
 
-- `:MatchTagToggleHighlightCursorOn` Toggle `g:vim_matchtag_highlight_cursor_on`.
+- `:MatchTagToggleHighlightCursorOn` Toggle highlighting of the tag when the cursor is on it.
 
 ## Performance
 
