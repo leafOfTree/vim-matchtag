@@ -50,17 +50,17 @@ let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.vue,*.svelte,*.jsp'
 
 | variable                             | description                                         | default |
 |--------------------------------------|-----------------------------------------------------|---------|
-| `g:vim_matchtag_files`               | Enable on these files.                              | *See ^* |
-| `g:vim_matchtag_enable_by_default`   | Enable by default.                                  | 1       |
-| `g:vim_matchtag_highlight_cursor_on` | Highlight the current tag when the cursor is on it. | 0       |
+| g:vim_matchtag_files               | Enable on these files.                              | *See ^* |
+| g:vim_matchtag_enable_by_default   | Enable by default.                                  | 1       |
+| g:vim_matchtag_highlight_cursor_on | Highlight the current tag when the cursor is on it. | 0       |
 | **Mappings / Performance / debug related** |||
-| `g:vim_matchtag_mapping_toggle`                     | Key mapping to toggle highlighting.                     | `''`    |
-| `g:vim_matchtag_mapping_toggle_highlight_cursor_on` | Key mapping to toggle `highlight_cursor_on`. | `''`    |
-| `g:vim_matchtag_skip`          | Syntax to skip.                                                                       | *See +* |
-| `g:vim_matchtag_skip_except`   | Syntax not to skip.                                                                   | *See +* |
-| `g:vim_matchtag_timeout`       | The search stops after timeout milliseconds.                                          | 50      |
-| `g:vim_matchtag_disable_cache` | Disable the cache for lines. <br>(By default the lines are cached until text changed) | 0       |
-| `g:vim_matchtag_debug`         | Echo debug messages.                                                                  | 0       |
+| g:vim_matchtag_mapping_toggle                     | Key mapping to toggle highlighting.                     | `''`    |
+| g:vim_matchtag_mapping_toggle_highlight_cursor_on | Key mapping to toggle `highlight_cursor_on`. | `''`    |
+| g:vim_matchtag_skip          | Syntax to skip.                                                                       | *See +* |
+| g:vim_matchtag_skip_except   | Syntax not to skip.                                                                   | *See +* |
+| g:vim_matchtag_timeout       | The search stops after timeout milliseconds.                                          | 50      |
+| g:vim_matchtag_disable_cache | Disable the cache for lines. <br>(By default the lines are cached until text changed) | 0       |
+| g:vim_matchtag_debug         | Echo debug messages.                                                                  | 0       |
 
 **Note**
 
