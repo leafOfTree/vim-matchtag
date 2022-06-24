@@ -81,7 +81,7 @@ let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.vue,*.svelte,*.jsp'
 
 ### Highlighting
 
-When the matching tag is found, the highlight group is `matchTag` (Default `IncSearch`). Otherwise, it's `matchTagError` (Default `Error`).
+When the matching tag is found, the highlight group is `matchTag` (by default `Visual`). Otherwise, it's `matchTagError` (by default `Error`).
 
 You could change them as follows.
 
