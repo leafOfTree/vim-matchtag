@@ -44,8 +44,8 @@ This plugin finds the matching tag and highlight it. Mainly inspired by vim buil
 Set global variable to `1` to enable or `0` to disalbe. Or a proper value to make it effective. Ex:
 
 ```vim
-let g:vim_matchtag_enable_by_default = 0
-let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.vue,*.svelte,*.jsp'
+let g:vim_matchtag_enable_by_default = 1
+let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.ts,*.tsx,*.vue,*.svelte,*.jsp,*.php,*.erb'
 ```
 
 | variable                             | description                                         | default |
