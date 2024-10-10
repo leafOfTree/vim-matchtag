@@ -60,9 +60,17 @@ augroup matchtag-maping
   endif
 augroup END
 
+function! s:ShouldEnableFile()
+  return stridx(s:files, '*.'.&filetype) != -1 || stridx(s:files, expand('%:t')) != -1
+endfunction
+
 " Enable by default for specific files
 if s:enable_by_default
-  execute 'autocmd BufNewFile,BufRead '.s:files
-        \.' ++once call matchtag#EnableMatchTag()'
+  if s:ShouldEnableFile()
+    call matchtag#EnableMatchTag()
+  else
+    execute 'autocmd BufNewFile,BufRead '.s:files
+          \.' ++once call matchtag#EnableMatchTag()'
+  endif
 endif
 " vim: fdm=marker
