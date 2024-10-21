@@ -32,7 +32,7 @@ let s:mapping_toggle_highlight_cursor_on = s:GetConfig('mapping_toggle_highlight
 let s:enable_by_default = s:GetConfig('enable_by_default', 1)
 
 " Use global variable so it can also be used by scripts in autoload
-let g:vim_matchtag_files_default = '*.html,*.xml,*.js,*.jsx,*.ts,*.tsx,*.vue,*.svelte,*.jsp,*.php,*.erb'
+let g:vim_matchtag_files_default = '*.html,*.xml,*.js,*.jsx,*.ts,*.tsx,*.vue,*.svelte,*.jsp,*.php,*.erb,*.astro'
 let s:files = s:GetConfig('files', g:vim_matchtag_files_default)
 "}}}
 

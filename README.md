@@ -45,7 +45,7 @@ Set global variable to `1` to enable or `0` to disalbe. Or a proper value to mak
 
 ```vim
 let g:vim_matchtag_enable_by_default = 1
-let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.ts,*.tsx,*.vue,*.svelte,*.jsp,*.php,*.erb'
+let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.ts,*.tsx,*.vue,*.svelte,*.jsp,*.php,*.erb,*.astro'
 ```
 
 | variable                             | description                                         | default |
@@ -69,7 +69,7 @@ let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.ts,*.tsx,*.vue,*.svelte,*.
 - ^: It is a comma separated file pattern (`:h autocmd-patterns`). It defaults to
 
     ```vim
-    let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.ts,*.tsx,*.vue,*.svelte,*.jsp,*.php,*.erb'
+    let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.ts,*.tsx,*.vue,*.svelte,*.jsp,*.php,*.erb,*.astro'
     ```
 - +: Both are patterns (`:h pattern`). The default values are
 
