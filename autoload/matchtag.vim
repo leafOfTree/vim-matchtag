@@ -89,8 +89,9 @@ function! s:HighlightTag()
   let save_cursor = getcurpos()
 
   let [cursor_row, cursor_col] = save_cursor[1:2]
-  if cursor_col < min([cursor_row * &shiftwidth, 20])
-    let bracket_col = searchpos('^\s\+\zs<', 'n', cursor_row, s:timeout)[1]
+  " Cursor in indent before a tag
+  if getline('.')[: cursor_col - 1] =~ '^\s*$'
+    let bracket_col = searchpos('^\s*\zs<', 'n', cursor_row, s:timeout)[1]
     if cursor_col < bracket_col
       call cursor(0, bracket_col)
     endif
