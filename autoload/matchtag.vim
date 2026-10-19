@@ -109,8 +109,8 @@ function! s:HighlightTag()
     call cursor(row, col)
 
     let self_closing = s:IsSelfClosingTag()
-    let [match_row, match_col, offset] = self_closing
-          \ ? [0, 0, 0]
+    let [match_row, match_col, offset, searched_all] = self_closing
+          \ ? [0, 0, 0, 1]
           \ : s:SearchMatchTag(tagname)
     if match_row " Find matching tag
       let match_line = match_row == row 
@@ -139,10 +139,13 @@ function! s:HighlightTag()
         " Current tag is emtpy
         call matchaddpos('MatchTag', pos, 10, s:match_id)
         call s:Log('Current tag is empty: '.tagname)
-      else
+      elseif searched_all
         " Matching tag not found
         call matchaddpos('MatchTagError', pos, 10, s:match_id)
         call s:Log('Matching tag Not found')
+      else
+        " Matching tag may be out of window, or the search timed out
+        call s:Log('Matching tag Not found in window')
       endif
     endif
     let w:matchtag_hl_on = 1
@@ -308,9 +311,19 @@ function! s:SearchMatchTag(tagname)
   let name = escape(name, '.').'\%('.s:tagname_regexp.'\)\@!'
   let start = '<'.name
   let end = '<\zs/'.name
-  let [row, col] = searchpairpos(start, '', end, flags, function('s:SkipMatch'), 0, s:timeout)
+  " Search in window only like matchparen. The matching tag out of window
+  " can't be seen, and searching the whole file may be slow
+  let stopline = flags =~ 'b'
+        \ ? min([line('w0'), line('.')])
+        \ : max([line('w$'), line('.')])
+  let start_time = reltime()
+  let [row, col] = searchpairpos(start, '', end, flags, function('s:SkipMatch'), stopline, s:timeout)
 
-  return [row, col, offset]
+  " Whether the whole file was searched, so a missing match is an error
+  let searched_all = stopline == (flags =~ 'b' ? 1 : line('$'))
+        \ && (s:timeout <= 0
+        \      || reltimefloat(reltime(start_time)) * 1000 < s:timeout)
+  return [row, col, offset, searched_all]
 endfunction
 
 function! s:SkipMatch()
