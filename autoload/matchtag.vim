@@ -402,42 +402,8 @@ function! s:IsInSkipSyntax()
 endfunction
 
 function! s:SynNames()
-  let lnum = line('.')
-  let cnum = col('.')
-  let ids = synstack(lnum, cnum)
-  let names = map(ids, { _, id -> synIDattr(id, 'name') })
-
-  if empty(names)
-    let names = s:NearSynNames(lnum)
-  endif
-  return names
-endfunction
-
-function! s:NearSynNames(lnum)
-  let lnum = a:lnum
-  let cnum = col('$')
-  let names = []
-  if empty(names)
-    " Try next line if empty
-    let nextlnum = nextnonblank(lnum)
-    let nextcnum = cnum
-    let ids = synstack(nextlnum, nextcnum)
-    let names = map(ids, { _, id -> synIDattr(id, 'name') })
-  endif
-  if empty(names)
-    " Try prev line if empty
-    let prevlnum = prevnonblank(lnum)
-    let prevcnum = cnum
-    let ids = synstack(prevlnum, prevcnum)
-    let names = map(ids, { _, id -> synIDattr(id, 'name') })
-  endif
-
-  " Not sure why names become 0 when opening empty file
-  if empty(names)
-    return []
-  else
-    return names
-  endif
+  let ids = synstack(line('.'), col('.'))
+  return map(ids, { _, id -> synIDattr(id, 'name') })
 endfunction
 
 " Ignore case, e.g. 'javascript' matches 'javaScript' in html syntax
