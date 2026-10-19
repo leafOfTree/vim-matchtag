@@ -75,7 +75,7 @@ let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.ts,*.tsx,*.vue,*.svelte,*.
 
     ```vim
     let g:vim_matchtag_skip = 'javascript\|css\|script\|style'
-    let g:vim_matchtag_skip_except = 'html\|template'
+    let g:vim_matchtag_skip_except = 'html\|template\|tsx\|jsx'
     ```
 - See [performance](#performance) if there are lags.
 

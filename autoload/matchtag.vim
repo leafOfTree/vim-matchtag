@@ -30,7 +30,7 @@ let s:disable_cache = s:GetConfig('disable_cache',
 let s:skip = s:GetConfig('skip', 
       \ 'javascript\|css\|script\|style')
 let s:skip_except = s:GetConfig('skip_except', 
-      \ 'html\|template')
+      \ 'html\|template\|tsx\|jsx')
 "}}}
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
