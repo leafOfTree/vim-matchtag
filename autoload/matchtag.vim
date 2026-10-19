@@ -419,16 +419,18 @@ function! s:NearSynNames(lnum)
   endif
 endfunction
 
+" Ignore case, e.g. 'javascript' matches 'javaScript' in html syntax
 function! s:containSyntax(names, pat)
   if empty(a:pat)
     return 0
-  endif 
+  endif
 
   for syn in a:names
-    if syn =~ a:pat
+    if syn =~? a:pat
       return 1
     endif
   endfor
+  return 0
 endfunction
 
 function! s:DeleteMatch()
