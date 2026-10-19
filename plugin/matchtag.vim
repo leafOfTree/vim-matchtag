@@ -22,8 +22,7 @@ endif
 "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:GetConfig(name, default)
-  let name = 'g:vim_matchtag_'.a:name
-  return exists(name) ? eval(name) : a:default
+  return get(g:, 'vim_matchtag_'.a:name, a:default)
 endfunction
 
 let s:mapping_toggle = s:GetConfig('mapping_toggle', '')

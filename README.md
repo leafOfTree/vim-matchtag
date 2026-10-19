@@ -68,6 +68,8 @@ let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.ts,*.tsx,*.vue,*.svelte,*.
 
 - If you prefer to enable it on demand, you can set `g:vim_matchtag_enable_by_default` to `0` then toggle it by `:MatchTagToggle`.
 
+- The variables are read when the plugin is loaded, so set them in your vimrc, or before the plugin is loaded with a plugin manager. Changing them later takes effect after restarting Vim.
+
 - ^: It is a comma separated file pattern (`:h autocmd-patterns`). It defaults to
 
     ```vim
@@ -139,6 +141,16 @@ If tags are not highlighted in some files
 ## Others
 
 - Jump between matching tags with `%`? This plugin only highlights tags. Jumping is provided by the builtin `matchit`, see `:h matchit`. For filetypes it doesn't support by default, like svelte, set `b:match_words` (`:h matchit-newlang`) or use a plugin such as [vim-svelte-plugin][4] or [vim-vue-plugin][5].
+
+## Tests
+
+Run tests with Vim and Neovim, whichever is installed
+
+```sh
+./test/run.sh
+```
+
+Test cases are in [test/run.vim](test/run.vim). They also run on GitHub Actions for each push and pull request.
 
 ## Credits
 

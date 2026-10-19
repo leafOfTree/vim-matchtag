@@ -18,8 +18,7 @@ let s:exists_text_changed = exists('##TextChanged')
 "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:GetConfig(name, default)
-  let name = 'g:vim_matchtag_'.a:name
-  return exists(name) ? eval(name) : a:default
+  return get(g:, 'vim_matchtag_'.a:name, a:default)
 endfunction
 
 let s:highlight_cursor_on = s:GetConfig('highlight_cursor_on', s:GetConfig('both', 0))
@@ -63,13 +62,20 @@ function! matchtag#HighlightMatchingTag()
 endfunction
 
 let s:cached_lines = {}
+let s:cache_key = ''
 function! s:ResetLineCache()
   let s:cached_lines = {}
 endfunction
 
 if !s:disable_cache
-  " Cache lines
+  " Cache lines until the buffer or its text changes, including reloading
+  " by :edit!, which doesn't trigger TextChanged
   function! s:GetLine(number)
+    let key = bufnr('%').':'.b:changedtick
+    if key !=# s:cache_key
+      let s:cached_lines = {}
+      let s:cache_key = key
+    endif
     let number = a:number
     if has_key(s:cached_lines, number)
       return s:cached_lines[number]
@@ -89,8 +95,9 @@ function! s:HighlightTag()
   let save_cursor = getcurpos()
 
   let [cursor_row, cursor_col] = save_cursor[1:2]
-  if cursor_col < min([cursor_row * &shiftwidth, 20])
-    let bracket_col = searchpos('^\s\+\zs<', 'n', cursor_row, s:timeout)[1]
+  " Cursor in indent before a tag
+  if getline('.')[: cursor_col - 1] =~ '^\s*$'
+    let bracket_col = searchpos('^\s*\zs<', 'n', cursor_row, s:timeout)[1]
     if cursor_col < bracket_col
       call cursor(0, bracket_col)
     endif
@@ -108,8 +115,8 @@ function! s:HighlightTag()
     call cursor(row, col)
 
     let self_closing = s:IsSelfClosingTag()
-    let [match_row, match_col, offset] = self_closing
-          \ ? [0, 0, 0]
+    let [match_row, match_col, offset, searched_all] = self_closing
+          \ ? [0, 0, 0, 1]
           \ : s:SearchMatchTag(tagname)
     if match_row " Find matching tag
       let match_line = match_row == row 
@@ -138,10 +145,13 @@ function! s:HighlightTag()
         " Current tag is emtpy
         call matchaddpos('MatchTag', pos, 10, s:match_id)
         call s:Log('Current tag is empty: '.tagname)
-      else
+      elseif searched_all
         " Matching tag not found
         call matchaddpos('MatchTagError', pos, 10, s:match_id)
         call s:Log('Matching tag Not found')
+      else
+        " Matching tag may be out of window, or the search timed out
+        call s:Log('Matching tag Not found in window')
       endif
     endif
     let w:matchtag_hl_on = 1
@@ -307,9 +317,19 @@ function! s:SearchMatchTag(tagname)
   let name = escape(name, '.').'\%('.s:tagname_regexp.'\)\@!'
   let start = '<'.name
   let end = '<\zs/'.name
-  let [row, col] = searchpairpos(start, '', end, flags, function('s:SkipMatch'), 0, s:timeout)
+  " Search in window only like matchparen. The matching tag out of window
+  " can't be seen, and searching the whole file may be slow
+  let stopline = flags =~ 'b'
+        \ ? min([line('w0'), line('.')])
+        \ : max([line('w$'), line('.')])
+  let start_time = reltime()
+  let [row, col] = searchpairpos(start, '', end, flags, function('s:SkipMatch'), stopline, s:timeout)
 
-  return [row, col, offset]
+  " Whether the whole file was searched, so a missing match is an error
+  let searched_all = stopline == (flags =~ 'b' ? 1 : line('$'))
+        \ && (s:timeout <= 0
+        \      || reltimefloat(reltime(start_time)) * 1000 < s:timeout)
+  return [row, col, offset, searched_all]
 endfunction
 
 function! s:SkipMatch()
@@ -381,54 +401,22 @@ function! s:IsInSkipSyntax()
 endfunction
 
 function! s:SynNames()
-  let lnum = line('.')
-  let cnum = col('.')
-  let ids = synstack(lnum, cnum)
-  let names = map(ids, { _, id -> synIDattr(id, 'name') })
-
-  if empty(names)
-    let names = s:NearSynNames(lnum)
-  endif
-  return names
+  let ids = synstack(line('.'), col('.'))
+  return map(ids, { _, id -> synIDattr(id, 'name') })
 endfunction
 
-function! s:NearSynNames(lnum)
-  let lnum = a:lnum
-  let cnum = col('$')
-  let names = []
-  if empty(names)
-    " Try next line if empty
-    let nextlnum = nextnonblank(lnum)
-    let nextcnum = cnum
-    let ids = synstack(nextlnum, nextcnum)
-    let names = map(ids, { _, id -> synIDattr(id, 'name') })
-  endif
-  if empty(names)
-    " Try prev line if empty
-    let prevlnum = prevnonblank(lnum)
-    let prevcnum = cnum
-    let ids = synstack(prevlnum, prevcnum)
-    let names = map(ids, { _, id -> synIDattr(id, 'name') })
-  endif
-
-  " Not sure why names become 0 when opening empty file
-  if empty(names)
-    return []
-  else
-    return names
-  endif
-endfunction
-
+" Ignore case, e.g. 'javascript' matches 'javaScript' in html syntax
 function! s:containSyntax(names, pat)
   if empty(a:pat)
     return 0
-  endif 
+  endif
 
   for syn in a:names
-    if syn =~ a:pat
+    if syn =~? a:pat
       return 1
     endif
   endfor
+  return 0
 endfunction
 
 function! s:DeleteMatch()
@@ -489,7 +477,7 @@ function! s:Log(msg)
 endfunction
 
 function! matchtag#Log(msg)
-  call s:Log(msg)
+  call s:Log(a:msg)
 endfunction
 
 function! matchtag#ReportTime()
