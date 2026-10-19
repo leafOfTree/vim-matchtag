@@ -491,7 +491,7 @@ function! s:Log(msg)
 endfunction
 
 function! matchtag#Log(msg)
-  call s:Log(msg)
+  call s:Log(a:msg)
 endfunction
 
 function! matchtag#ReportTime()
