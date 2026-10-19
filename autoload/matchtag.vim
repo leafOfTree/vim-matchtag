@@ -63,13 +63,20 @@ function! matchtag#HighlightMatchingTag()
 endfunction
 
 let s:cached_lines = {}
+let s:cache_key = ''
 function! s:ResetLineCache()
   let s:cached_lines = {}
 endfunction
 
 if !s:disable_cache
-  " Cache lines
+  " Cache lines until the buffer or its text changes, including reloading
+  " by :edit!, which doesn't trigger TextChanged
   function! s:GetLine(number)
+    let key = bufnr('%').':'.b:changedtick
+    if key !=# s:cache_key
+      let s:cached_lines = {}
+      let s:cache_key = key
+    endif
     let number = a:number
     if has_key(s:cached_lines, number)
       return s:cached_lines[number]
