@@ -107,7 +107,10 @@ function! s:HighlightTag()
     " Set cursor to tag start to search backward correctly
     call cursor(row, col)
 
-    let [match_row, match_col, offset] = s:SearchMatchTag(tagname)
+    let self_closing = s:IsSelfClosingTag()
+    let [match_row, match_col, offset] = self_closing
+          \ ? [0, 0, 0]
+          \ : s:SearchMatchTag(tagname)
     if match_row " Find matching tag
       let match_line = match_row == row 
             \ ? line 
@@ -131,7 +134,7 @@ function! s:HighlightTag()
       call matchaddpos('MatchTag', match_pos, 10, s:match_id+1)
       call s:Log('Matching tag '.match_tagname)
     else " No matching tag found
-      if s:IsEmptyTag(tagname)
+      if self_closing || s:IsEmptyTag(tagname)
         " Current tag is emtpy
         call matchaddpos('MatchTag', pos, 10, s:match_id)
         call s:Log('Current tag is empty: '.tagname)
@@ -290,20 +293,70 @@ function! s:SearchMatchTag(tagname)
   let tagname = a:tagname
   let flags = 'nW'
   if tagname[0] == '/'
-    let start = '<'.tagname[1:]
-    let end = tagname
+    let name = tagname[1:]
     let flags = flags.'b'
 
     " Don't include '<' if search backward
     let offset = 1
   else
-    let start = '<'.tagname
-    let end = '/'.tagname
+    let name = tagname
     let offset = 0
   endif
-  let [row, col] = searchpairpos(start, '', end, flags, function('s:IsInCommentOrString'), 0, s:timeout)
+  " Match the whole tag name only, e.g. not '<div' in '<divider'
+  " or '/img' in 'src="./img/a.png"'
+  let name = escape(name, '.').'\%('.s:tagname_regexp.'\)\@!'
+  let start = '<'.name
+  let end = '<\zs/'.name
+  let [row, col] = searchpairpos(start, '', end, flags, function('s:SkipMatch'), 0, s:timeout)
 
   return [row, col, offset]
+endfunction
+
+function! s:SkipMatch()
+  return s:IsInCommentOrString() || s:IsSelfClosingTag()
+endfunction
+
+" Check if the tag starting at cursor ends with '/>', e.g. <div />
+" '>' inside quotes or braces like {() => ...} is ignored
+let s:self_closing_max_lines = 50
+function! s:IsSelfClosingTag()
+  let [lnum, col] = [line('.'), col('.') - 1]
+  let line = s:GetLine(lnum)
+  if line[col] != '<' || line[col + 1] == '/'
+    return 0
+  endif
+
+  let last = min([line('$'), lnum + s:self_closing_max_lines])
+  let quote = ''
+  let depth = 0
+  let prev = ''
+  let col += 1
+  while lnum <= last
+    while col < len(line)
+      let char = line[col]
+      if !empty(quote)
+        if char == quote
+          let quote = ''
+        endif
+      elseif char =~ '["'']' || (char == '`' && depth > 0)
+        let quote = char
+      elseif char == '{'
+        let depth += 1
+      elseif char == '}'
+        let depth -= 1
+      elseif char == '>' && depth <= 0
+        return prev == '/'
+      endif
+      if char !~ '\s'
+        let prev = char
+      endif
+      let col += 1
+    endwhile
+    let lnum += 1
+    let line = s:GetLine(lnum)
+    let col = 0
+  endwhile
+  return 0
 endfunction
 
 function! s:IsInCommentOrString()
