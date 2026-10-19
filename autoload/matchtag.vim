@@ -18,8 +18,7 @@ let s:exists_text_changed = exists('##TextChanged')
 "
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 function! s:GetConfig(name, default)
-  let name = 'g:vim_matchtag_'.a:name
-  return exists(name) ? eval(name) : a:default
+  return get(g:, 'vim_matchtag_'.a:name, a:default)
 endfunction
 
 let s:highlight_cursor_on = s:GetConfig('highlight_cursor_on', s:GetConfig('both', 0))

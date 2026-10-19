@@ -68,6 +68,8 @@ let g:vim_matchtag_files = '*.html,*.xml,*.js,*.jsx,*.ts,*.tsx,*.vue,*.svelte,*.
 
 - If you prefer to enable it on demand, you can set `g:vim_matchtag_enable_by_default` to `0` then toggle it by `:MatchTagToggle`.
 
+- The variables are read when the plugin is loaded, so set them in your vimrc, or before the plugin is loaded with a plugin manager. Changing them later takes effect after restarting Vim.
+
 - ^: It is a comma separated file pattern (`:h autocmd-patterns`). It defaults to
 
     ```vim
