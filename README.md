@@ -1,4 +1,4 @@
-<img src="https://raw.githubusercontent.com/leafOfTree/leafOfTree.github.io/master/vim-matchtag.svg" width="60" height="60" alt="icon" align="left"/>
+<img src="https://raw.githubusercontent.com/leafOfTree/leafOfTree.github.io/master/vim-matchtag.svg" width="60" alt="icon" align="left"/>
 
 # vim-matchtag
 
